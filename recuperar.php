@@ -7,12 +7,20 @@ $codigo = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         checkCsrf();
-        if (($_POST['action'] ?? '') === 'restablecer') {
+        $action = $_POST['action'] ?? '';
+        if ($action === 'restablecer') {
             restablecerConCodigo();
+            unset($_SESSION['pregunta_pendiente']);
             flash('Contraseña restablecida. Ya puedes iniciar sesión.');
             redirectTo('login');
         }
-        $codigo = emitirCodigoRecuperacion();
+        if ($action === 'buscar_pregunta') {
+            unset($_SESSION['pregunta_pendiente']);
+            iniciarPreguntaRecuperacion();
+        } elseif ($action === 'verificar') {
+            $codigo = emitirCodigoRecuperacion();
+            unset($_SESSION['pregunta_pendiente']);
+        }
     } catch (PDOException $e) {
         error_log($e->getMessage());
         $error = 'No se pudo completar la recuperación. Revisa la configuración de la base de datos.';
@@ -20,6 +28,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = $e->getMessage();
     }
 }
+if (isset($_GET['reiniciar']) || ($_SESSION['pregunta_pendiente']['vence'] ?? 0) <= time()) {
+    unset($_SESSION['pregunta_pendiente']);
+}
+$pendiente = $_SESSION['pregunta_pendiente'] ?? null;
 ?>
 <!doctype html>
 <html lang="es">
@@ -43,21 +55,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label>Código generado <input readonly value="<?=h($codigo)?>"></label>
         </section>
         <script src="assets/qr-recuperacion.js" defer></script>
-    <?php else: ?>
+    <?php elseif ($pendiente): ?>
         <form method="post" class="card">
-            <h2>Verifica tu pregunta</h2>
+            <h2>Responde tu pregunta de seguridad</h2>
+            <p>Cuenta: <strong><?=h($pendiente['email'])?></strong></p>
             <?=csrf()?>
             <input type="hidden" name="action" value="verificar">
-            <label>Correo <input name="email" type="email" maxlength="190" required></label>
-            <label>Pregunta de seguridad
-                <select name="pregunta" required>
-                    <?php foreach (preguntasRecuperacion() as $id => $texto): ?>
-                        <option value="<?=h($id)?>"><?=h($texto)?></option>
-                    <?php endforeach; ?>
-                </select>
+            <label><?=h(preguntasRecuperacion()[$pendiente['pregunta']])?>
+                <input type="password" name="respuesta" maxlength="72" required>
             </label>
-            <label>Respuesta <input type="password" name="respuesta" maxlength="72" required></label>
             <button>Verificar y generar QR</button>
+            <p><a href="recuperar.php?reiniciar=1">Usar otro correo</a></p>
+        </form>
+    <?php else: ?>
+        <form method="post" class="card">
+            <h2>Encuentra tu pregunta de seguridad</h2>
+            <?=csrf()?>
+            <input type="hidden" name="action" value="buscar_pregunta">
+            <label>Correo <input name="email" type="email" maxlength="190" required></label>
+            <button>Mostrar mi pregunta</button>
         </form>
         <p class="help">Si todavía no configuraste una pregunta, solicita ayuda a la administración de tu escuela.</p>
     <?php endif; ?>

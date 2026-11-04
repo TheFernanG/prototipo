@@ -111,5 +111,5 @@ Entrega académica local. Antes de usar datos reales o publicar en Internet se r
 
 - Instalación nueva: importa `base_de_datos.sql`. Instalación existente: importa únicamente `actualizar_recuperacion.sql` en phpMyAdmin.
 - Inicia sesión y guarda una pregunta y respuesta desde **Mi cuenta → Pregunta de seguridad**.
-- Cierra sesión, entra en **¿Olvidaste tu contraseña?** y completa el correo, la pregunta y la respuesta.
+- Cierra sesión, entra en **¿Olvidaste tu contraseña?** y escribe tu correo, pulsa **Mostrar mi pregunta** y contesta la pregunta de esa cuenta.
 - Con una respuesta correcta, la página genera un QR local con un código de un solo uso que vence en 10 minutos. En el mismo navegador el formulario se rellena con el código. Si lo escaneas con otro dispositivo, puedes copiar el texto del QR y pegarlo en el formulario.

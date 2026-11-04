@@ -375,7 +375,16 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
                 <div class="section-title feed"><span><?=h($r['nombre'])?></span><?=deleteForm($table,(int)$r['id'])?>
                 </div><?php endforeach; ?>
             </section><?php endforeach; ?>
-<?php elseif($p==='perfil'): ?>
+<?php elseif($p==='perfil'):
+try {
+    $preguntaGuardada = one('SELECT pregunta FROM recuperacion_cuenta WHERE usuario_id=?', [$u['id']])['pregunta'] ?? '';
+} catch (PDOException $e) {
+    if ($e->getCode() !== '42S02') {
+        throw $e;
+    }
+    $preguntaGuardada = '';
+}
+?>
             <div class="columns">
                 <section class="card">
                     <div class="avatar large"><?=h(strtoupper(substr($u['nombre'],0,1)))?>
@@ -399,6 +408,9 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
                 </section>
                 <section class="card">
                     <h2>Pregunta de seguridad</h2>
+                    <?php if ($preguntaGuardada): ?>
+                        <p>Pregunta guardada: <strong><?=h(preguntasRecuperacion()[$preguntaGuardada])?></strong></p>
+                    <?php endif; ?>
                     <p class="help">Configúrala para recuperar tu contraseña. Elige una respuesta que otras personas desconozcan.</p>
                     <form method="post">
                         <?=csrf()?>
@@ -406,7 +418,7 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
                         <label>Pregunta
                             <select name="pregunta" required>
                                 <?php foreach (preguntasRecuperacion() as $id => $texto): ?>
-                                    <option value="<?=h($id)?>"><?=h($texto)?></option>
+                                    <option value="<?=h($id)?>" <?=$preguntaGuardada===$id?'selected':''?>><?=h($texto)?></option>
                                 <?php endforeach; ?>
                             </select>
                         </label>

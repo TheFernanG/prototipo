@@ -43,9 +43,30 @@ function guardarPreguntaRecuperacion(array $usuario): void {
         token_hash=NULL,vence=NULL,password_version=NULL', [$usuario['id'], $pregunta, $respuesta]);
 }
 
-function emitirCodigoRecuperacion(): string {
+function iniciarPreguntaRecuperacion(): void {
     $email = val('email', 190);
-    $pregunta = val('pregunta', 20);
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        throw new RuntimeException('Escribe un correo válido.');
+    }
+    $cuenta = one('SELECT r.pregunta FROM usuarios u JOIN recuperacion_cuenta r
+        ON r.usuario_id=u.id WHERE u.email=? AND u.activo=1', [$email]);
+    $preguntas = array_keys(preguntasRecuperacion());
+    $alternativa = $preguntas[hexdec(substr(hash('sha256', strtolower($email)), 0, 4)) % count($preguntas)];
+    $_SESSION['pregunta_pendiente'] = [
+        'email' => $email,
+        'pregunta' => $cuenta['pregunta'] ?? $alternativa,
+        'vence' => time() + 600,
+    ];
+}
+
+function emitirCodigoRecuperacion(): string {
+    $pendiente = $_SESSION['pregunta_pendiente'] ?? null;
+    if (!$pendiente || $pendiente['vence'] <= time()) {
+        unset($_SESSION['pregunta_pendiente']);
+        throw new RuntimeException('Vuelve a introducir tu correo para comenzar.');
+    }
+    $email = $pendiente['email'];
+    $pregunta = $pendiente['pregunta'];
     $respuesta = respuestaRecuperacion();
     limitarRecuperacion($email);
     $cuenta = one('SELECT u.id,u.password,r.pregunta,r.respuesta FROM usuarios u
