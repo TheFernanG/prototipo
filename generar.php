@@ -1,0 +1,11 @@
+<?php
+require_once __DIR__.'/config.php';require_once __DIR__.'/ia.php';require_login();
+if ($_SERVER['REQUEST_METHOD']==='POST') {
+ verify_csrf();$tipo=(string)($_POST['tipo']??'');$materia=trim((string)($_POST['materia']??''));$nivel=trim((string)($_POST['nivel']??''));$tema=trim((string)($_POST['tema']??''));$estrategia=trim((string)($_POST['estrategia']??''));
+ if (!in_array($tipo,['planeacion','examen','actividad'],true)||$materia===''||$nivel===''||$tema===''||mb_strlen($materia)>100||mb_strlen($nivel)>100||mb_strlen($tema)>160||mb_strlen($estrategia)>160) flash('Completa los campos requeridos.');
+ else {try {[$contenido,$modo]=generar_contenido($tipo,$materia,$nivel,$tema,$estrategia);$s=db()->prepare('INSERT INTO recursos(usuario_id,tipo,materia,nivel,tema,resultado) VALUES(?,?,?,?,?,?)');$s->execute([$_SESSION['usuario_id'],$tipo,$materia,$nivel,$tema,$contenido]);$id=db()->lastInsertId();flash('Recurso creado en modo '.$modo.'.','ok');go('recurso.php?id='.$id);}catch(Throwable $e){error_log($e->getMessage());flash('No se pudo generar el recurso. Revisa la configuración de Gemini o la conexión.');}}
+ go('generar.php');
+}
+layout_start('Generar recurso'); ?>
+<div class="card formcard"><p class="eyebrow">COCREACIÓN PEDAGÓGICA</p><h1>Generar un recurso educativo</h1><p>El resultado se guardará en tu panel. Sin clave de Gemini se usa una plantilla de demostración.</p><form method="post"><?php csrf_input(); ?><label>¿Qué quieres generar?<select name="tipo"><option value="planeacion">Planeación didáctica</option><option value="examen">Examen formativo</option><option value="actividad">Actividad interactiva</option></select></label><label>Materia<input name="materia" placeholder="Ej. Matemáticas" maxlength="100" required></label><label>Nivel educativo<select name="nivel"><option>Primaria</option><option>Secundaria</option><option>Bachillerato</option><option>Universidad</option></select></label><label>Tema<input name="tema" placeholder="Ej. Fracciones" maxlength="160" required></label><label>Estrategia aprendida en una capacitación (opcional)<input name="estrategia" maxlength="160" placeholder="Ej. Aprendizaje basado en problemas"></label><button>✦ Generar y guardar</button></form></div>
+<?php layout_end();

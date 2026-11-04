@@ -1,0 +1,24 @@
+EDUMENTOR IA - VERSIÓN PHP + MYSQL
+================================
+1. Instala XAMPP y activa Apache y MySQL.
+2. Copia la carpeta EduMentor_PHP_MySQL en C:\xampp\htdocs\
+3. Entra a http://localhost/phpmyadmin
+4. Ve a Importar y selecciona base_de_datos.sql (crea la base de datos y las tablas).
+5. Abre http://localhost/EduMentor_PHP_MySQL/
+6. Registra una cuenta y entra al panel.
+
+CONFIGURACIÓN
+- En config.php, ajusta DB_HOST, DB_NAME, DB_USER y DB_PASS según tu MySQL.
+- Si quieres generación real con Gemini, agrega GEMINI_API_KEY en config.php y activa la extensión curl en php.ini.
+- Sin API, el sistema genera plantillas de demostración, como el original.
+- Requiere PHP 8.1 o superior, PDO MySQL y mbstring; MySQL 8+ o MariaDB compatible.
+
+SESIONES
+- login.php: al abrir la página por GET, destruye la sesión anterior con session_destroy() y crea una nueva.
+- salir.php: al cerrar sesión por POST, destruye la sesión y elimina la cookie.
+- Se usa session_regenerate_id(true) después de iniciar sesión correctamente.
+
+IMPORTANTE
+- El proyecto original estaba en Flask/SQLite. Esta versión utiliza PHP y MySQL.
+- La base de datos incluida es una estructura vacía para instalar, NO migra automáticamente usuarios ni datos previos del archivo SQLite original.
+- No expongas la API ni las contraseñas en repositorios públicos. Para producción configura HTTPS y secretos fuera del directorio público.
