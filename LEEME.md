@@ -106,3 +106,10 @@ Entrega académica local. Antes de usar datos reales o publicar en Internet se r
 - Con el sitio abierto, el navegador consulta los mensajes aproximadamente cada dos segundos. El punto en **Mensajes** aparece si hay mensajes sin leer. Al enviar, aparece un punto junto a **Mensaje enviado**.
 - Cerrar sesión elimina la sesión y su cookie. Si usas Atrás, las páginas privadas vuelven a comprobar el acceso.
 - Para actualizar una instalación existente, copia los archivos del proyecto. No hace falta volver a importar la base de datos. Conserva tu configuración local de `config.php`.
+
+## Recuperación de contraseña
+
+- Instalación nueva: importa `base_de_datos.sql`. Instalación existente: importa únicamente `actualizar_recuperacion.sql` en phpMyAdmin.
+- Inicia sesión y guarda una pregunta y respuesta desde **Mi cuenta → Pregunta de seguridad**.
+- Cierra sesión, entra en **¿Olvidaste tu contraseña?** y completa el correo, la pregunta y la respuesta.
+- Con una respuesta correcta, la página genera un QR local con un código de un solo uso que vence en 10 minutos. En el mismo navegador el formulario se rellena con el código. Si lo escaneas con otro dispositivo, puedes copiar el texto del QR y pegarlo en el formulario.

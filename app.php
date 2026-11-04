@@ -87,6 +87,8 @@ function studentSql(string $col): array { $ids=array_map('intval',array_column(s
 function audienceSql(string $alias='r'): array { $ids=array_map('intval',array_column(groups(),'id')); if (role('administrador')) return ['1=1',[]]; return ["($alias.grupo_id IS NULL".($ids?' OR '.$alias.'.grupo_id IN ('.implode(',',array_fill(0,count($ids),'?')).')':'').')',$ids]; }
 function validateUser(int $id,string $rol): void { if (!one('SELECT id FROM usuarios WHERE id=? AND rol=? AND activo=1',[$id,$rol])) throw new RuntimeException('Usuario inválido para este rol.'); }
 function deleteForm(string $table,int $id): string { return '<form method="post" class="inline">'.csrf().'<input type="hidden" name="action" value="delete"><input type="hidden" name="table" value="'.h($table).'"><input type="hidden" name="id" value="'.$id.'"><button class="danger small">Eliminar</button></form>'; }
+require_once __DIR__.'/recuperacion_logica.php';
+
 function handlePost(): void {
     checkCsrf(); $action=val('action',40);
     if ($action==='login') {
@@ -107,6 +109,11 @@ function handlePost(): void {
     }
     if (!user()) redirectTo('login');
     if ($action==='logout') { destroySession(); redirectTo('login'); }
+    if ($action==='pregunta_recuperacion') {
+        guardarPreguntaRecuperacion(user());
+        flash('Pregunta de seguridad guardada.');
+        redirectTo('perfil');
+    }
     if ($action==='password') {
         if (!password_verify(val('actual',200),user()['password'])) throw new RuntimeException('La contraseña actual no coincide.');
         $p=val('nueva',200); if (strlen($p)<10) throw new RuntimeException('Usa al menos 10 caracteres.');

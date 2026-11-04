@@ -98,8 +98,8 @@ $u=$fatal?null:user(); ?><!doctype html>
 
             <form method="post"><?=csrf()?><input type="hidden" name="action" value="login"><label>Correo electrónico<input type="email" name="email" required maxlength="190" autocomplete="username" placeholder="tu.correo@escuela.mx"></label><label>Contraseña<input type="password" name="password" required maxlength="200" autocomplete="current-password"></label><button>Entrar a mi espacio →</button>
             </form>
-            <p class="help">¿Necesitas una cuenta o recuperar el acceso? Solicítala al administrador de tu escuela.
-            </p>
+            <p class="help"><a href="recuperar.php">¿Olvidaste tu contraseña?</a></p>
+            <p class="help">Solicita una cuenta al administrador de tu escuela.</p>
         </section>
     </main>
 <?php else: ?>
@@ -395,6 +395,24 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
                     <form method="post"><?=csrf()?><input type="hidden" name="action" value="password"><label>Contraseña actual<input type="password" name="actual" maxlength="200" required autocomplete="current-password"></label><label>Nueva contraseña<input type="password" name="nueva" minlength="10" maxlength="200" required autocomplete="new-password"></label>
                         <p class="help">Usa al menos 10 caracteres. Combina letras, números y símbolos.
                         </p><button>Actualizar contraseña</button>
+                    </form>
+                </section>
+                <section class="card">
+                    <h2>Pregunta de seguridad</h2>
+                    <p class="help">Configúrala para recuperar tu contraseña. Elige una respuesta que otras personas desconozcan.</p>
+                    <form method="post">
+                        <?=csrf()?>
+                        <input type="hidden" name="action" value="pregunta_recuperacion">
+                        <label>Pregunta
+                            <select name="pregunta" required>
+                                <?php foreach (preguntasRecuperacion() as $id => $texto): ?>
+                                    <option value="<?=h($id)?>"><?=h($texto)?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label>Respuesta <input type="password" name="respuesta" maxlength="72" required></label>
+                        <label>Contraseña actual <input type="password" name="actual" maxlength="200" autocomplete="current-password" required></label>
+                        <button>Guardar pregunta</button>
                     </form>
                 </section>
             </div><?php endif; ?>

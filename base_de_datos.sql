@@ -133,3 +133,14 @@ INSERT INTO mensajes(remitente_id,destinatario_id,asunto,cuerpo) VALUES(2,4,'Bie
 INSERT INTO calificaciones(alumno_id,asignacion_id,autor_id,periodo,calificacion,observaciones) VALUES(3,1,2,'Primer trimestre',9.20,'Participa con entusiasmo y resuelve los ejercicios de clase.');
 INSERT INTO reportes(alumno_id,autor_id,tipo,detalle,fecha) VALUES(3,2,'Positivo','Apoyó a sus compañeros durante la actividad en equipo.',CURDATE());
 INSERT INTO eventos(autor_id,grupo_id,titulo,descripcion,fecha,lugar) VALUES(1,NULL,'Reunión de bienvenida','Presentaremos las actividades y los objetivos del ciclo escolar.',DATE_ADD(CURDATE(),INTERVAL 7 DAY),'Salón de usos múltiples');
+
+USE comunidad_escolar;
+CREATE TABLE IF NOT EXISTS recuperacion_cuenta (
+    usuario_id INT UNSIGNED PRIMARY KEY,
+    pregunta VARCHAR(20) NOT NULL,
+    respuesta VARCHAR(255) NOT NULL,
+    token_hash CHAR(64) NULL UNIQUE,
+    vence DATETIME NULL,
+    password_version VARCHAR(255) NULL,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE
+) ENGINE=InnoDB;

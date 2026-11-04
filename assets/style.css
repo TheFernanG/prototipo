@@ -961,3 +961,5 @@ img.brand-symbol {
 body.session-check {
     visibility: hidden
 }
+
+#qr-recuperacion { max-width: 100%; height: auto; }
