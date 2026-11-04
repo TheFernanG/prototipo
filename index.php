@@ -104,7 +104,7 @@ $u=$fatal?null:user(); ?><!doctype html>
     </main>
 <?php else: ?>
 
-    <aside class="sidebar"><a href="index.php" class="brand"><img class="brand-symbol" src="assets/logo.svg" width="112" height="112" alt=""> Conecta<span class="brand-sub">ESCUELA</span></a>
+    <aside class="sidebar"><a href="index.php" class="brand"><img class="brand-symbol" src="assets/edu.png" width="112" height="112" alt=""> Conecta<span class="brand-sub">ESCUELA</span></a>
         <div class="workspace-label">MI ESPACIO ESCOLAR
         </div>
         <nav>
