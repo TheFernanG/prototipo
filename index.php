@@ -73,7 +73,7 @@ $u=$fatal?null:user(); ?><!doctype html>
 <?php if(!$u): ?>
 
     <main class="login-layout">
-        <section class="login-story"><a class="brand" href="index.php"><img class="brand-symbol" src="assets/logo.svg" width="36" height="36" alt=""> Conecta Escuela</a>
+        <section class="login-story"><a class="brand" href="index.php"><img class="brand-symbol" src="assets/edu.png" width="220" height="220" alt=""> Conecta Escuela</a>
             <div><span class="eyebrow">COMUNIDAD ESCOLAR</span>
                 <h1>Más cerca.<br>Mejor conectados.
                 </h1>
@@ -104,7 +104,7 @@ $u=$fatal?null:user(); ?><!doctype html>
     </main>
 <?php else: ?>
 
-    <aside class="sidebar"><a href="index.php" class="brand"><img class="brand-symbol" src="assets/logo.svg" width="36" height="36" alt=""> Conecta<span class="brand-sub">ESCUELA</span></a>
+    <aside class="sidebar"><a href="index.php" class="brand"><img class="brand-symbol" src="assets/logo.svg" width="112" height="112" alt=""> Conecta<span class="brand-sub">ESCUELA</span></a>
         <div class="workspace-label">MI ESPACIO ESCOLAR
         </div>
         <nav>

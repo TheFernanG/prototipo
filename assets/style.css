@@ -98,23 +98,22 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 }
 
 .brand-symbol {
-    display: inline-grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 12px;
-    background: #a9e8d0;
-    color: var(--dark);
-    font-size: 25px;
-    font-weight: 800
+    width: 112px;
+    height: 112px;
+}
+
+.login-story .brand-symbol {
+    width: clamp(135px, 21vw, 220px);
+    height: auto;
+    clip-path: circle(46%);
 }
 
 .brand-sub {
     font-size: 9px;
     letter-spacing: 3px;
     position: absolute;
-    left: 46px;
-    top: 29px
+    left: 121px;
+    top: 67px;
 }
 
 .workspace-label {
@@ -788,6 +787,11 @@ footer {
         width: 100%;
         padding: 18px;
         display: block
+    }
+
+    .sidebar .brand-symbol {
+        width: 76px;
+        height: 76px;
     }
 
     .sidebar .brand {
