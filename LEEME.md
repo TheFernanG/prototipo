@@ -99,3 +99,10 @@ Para restablecer una contraseña olvidada en esta práctica, un responsable con 
 ## Alcance
 
 Entrega académica local. Antes de usar datos reales o publicar en Internet se requiere configurar HTTPS, una cuenta MySQL con permisos limitados, respaldos y políticas de protección de datos de la escuela. No incluye notificaciones push, archivos adjuntos, chat en tiempo real ni aplicación móvil nativa.
+
+## Logo, mensajes y cierre de sesión
+
+- Puedes personalizar el logo sustituyendo `assets/logo.svg`.
+- Con el sitio abierto, el navegador consulta los mensajes aproximadamente cada dos segundos. El punto en **Mensajes** aparece si hay mensajes sin leer. Al enviar, aparece un punto junto a **Mensaje enviado**.
+- Cerrar sesión elimina la sesión y su cookie. Si usas Atrás, las páginas privadas vuelven a comprobar el acceso.
+- Para actualizar una instalación existente, copia los archivos del proyecto. No hace falta volver a importar la base de datos. Conserva tu configuración local de `config.php`.

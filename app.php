@@ -11,7 +11,7 @@ header('Content-Type: text/html; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 header('X-Frame-Options: DENY');
-header("Content-Security-Policy: default-src 'self'; style-src 'self'; img-src 'self' data:; script-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'");
+header("Content-Security-Policy: default-src 'self'; style-src 'self'; img-src 'self' data:; script-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'");
 function h($v): string { return htmlspecialchars((string)$v, ENT_QUOTES|ENT_SUBSTITUTE,'UTF-8'); }
 function redirectTo(string $page='inicio'): void { header('Location: index.php?p='.rawurlencode($page)); exit; }
 function db(): PDO {
@@ -26,6 +26,17 @@ function db(): PDO {
 function q(string $sql,array $args=[]): PDOStatement { $s=db()->prepare($sql); $s->execute($args); return $s; }
 function rows(string $sql,array $args=[]): array { return q($sql,$args)->fetchAll(); }
 function one(string $sql,array $args=[]): ?array { return q($sql,$args)->fetch() ?: null; }
+function destroySession(): void {
+    $_SESSION=[];
+    session_destroy();
+    $cookie=session_get_cookie_params();
+    unset($cookie['lifetime']);
+    $cookie['expires']=time()-3600;
+    setcookie(session_name(),'',$cookie);
+}
+function unreadMessages(int $id): int {
+    return (int)one('SELECT COUNT(*) n FROM mensajes WHERE destinatario_id=? AND leido=0',[$id])['n'];
+}
 function user(): ?array { static $u=false; if ($u===false) $u=isset($_SESSION['uid']) ? one('SELECT * FROM usuarios WHERE id=? AND activo=1',[$_SESSION['uid']]) : null; return $u; }
 function role(string ...$roles): bool { return user() && in_array(user()['rol'],$roles,true); }
 function requireRole(string ...$roles): void { if (!role(...$roles)) throw new RuntimeException('No tienes permiso para realizar esta acción.'); }
@@ -95,7 +106,7 @@ function handlePost(): void {
         session_regenerate_id(true); $_SESSION=['uid'=>$u['id'],'last'=>time(),'csrf'=>bin2hex(random_bytes(32))]; redirectTo();
     }
     if (!user()) redirectTo('login');
-    if ($action==='logout') { $_SESSION=[]; session_destroy(); setcookie(session_name(),'',time()-3600,'/'); redirectTo('login'); }
+    if ($action==='logout') { destroySession(); redirectTo('login'); }
     if ($action==='password') {
         if (!password_verify(val('actual',200),user()['password'])) throw new RuntimeException('La contraseña actual no coincide.');
         $p=val('nueva',200); if (strlen($p)<10) throw new RuntimeException('Usa al menos 10 caracteres.');
@@ -121,7 +132,7 @@ function handlePost(): void {
     if ($action==='link') { requireRole('administrador'); $p=num('padre_id'); $a=num('alumno_id'); validateUser($p,'padre'); validateUser($a,'alumno'); q('INSERT INTO vinculos(padre_id,alumno_id) VALUES(?,?)',[$p,$a]); flash('Familia vinculada.'); redirectTo('grupos'); }
     if ($action==='message') {
         $id=num('destinatario_id'); if(!in_array($id,array_map('intval',array_column(recipients(),'id')),true)) throw new RuntimeException('Destinatario fuera de tus grupos.');
-        q('INSERT INTO mensajes(remitente_id,destinatario_id,asunto,cuerpo) VALUES(?,?,?,?)',[user()['id'],$id,val('asunto',150),val('cuerpo',5000)]); flash('Mensaje enviado.'); redirectTo('mensajes');
+        q('INSERT INTO mensajes(remitente_id,destinatario_id,asunto,cuerpo) VALUES(?,?,?,?)',[user()['id'],$id,val('asunto',150),val('cuerpo',5000)]); flash('Mensaje enviado.','sent'); redirectTo('mensajes');
     }
     if ($action==='read') { q('UPDATE mensajes SET leido=1 WHERE id=? AND destinatario_id=?',[num('id'),user()['id']]); redirectTo('mensajes'); }
     if ($action==='announcement' || $action==='event') {
