@@ -5,7 +5,7 @@ $where=[
     'leidos'=>'m.destinatario_id=? AND m.leido=1',
     'enviados'=>'m.remitente_id=?',
 ][$folder];
-$msgs=rows("SELECT m.*,a.nombre remitente,b.nombre destinatario
+$msgs=rows("SELECT m.*,a.nombre remitente,b.nombre destinatario,b.rol destinatario_rol
     FROM mensajes m JOIN usuarios a ON a.id=m.remitente_id
     JOIN usuarios b ON b.id=m.destinatario_id
     WHERE $where ORDER BY (m.id=?) DESC,m.creado DESC,m.id DESC LIMIT 100",
@@ -25,6 +25,9 @@ $msgs=rows("SELECT m.*,a.nombre remitente,b.nombre destinatario
         <details class="message" id="mensaje-<?=h($m['id'])?>" data-message-id="<?=h($m['id'])?>" <?=$openedId===(int)$m['id']?'open':''?>>
             <summary><strong><?=h($m['asunto'])?></strong><small><?=h($m['remitente'])?> → <?=h($m['destinatario'])?></small></summary>
             <p class="pre"><?=h($m['cuerpo'])?></p><small><?=h($m['creado'])?></small>
+            <?php if (in_array($m['destinatario_rol'],['alumno','padre'],true)): ?>
+                <p><a class="button secondary small" href="citatorio.php?id=<?=h($m['id'])?>">Descargar citatorio PDF</a></p>
+            <?php endif; ?>
         </details>
     <?php endif; ?>
 <?php endforeach; ?>

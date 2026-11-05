@@ -130,3 +130,25 @@ En Mensajes, abrir un recibido lo mueve a Leídos. En las otras secciones,
 las novedades se marcan como vistas al entrar. Si llegan más mientras estás
 dentro, aparece el punto y el contenido se actualiza. Al volver a entrar,
 se quita el punto de esas novedades.
+
+## Eliminar usuarios y descargar citatorios
+
+En Usuarios, administración puede pulsar **Eliminar usuario**. La pantalla
+siguiente muestra el nombre y el correo de la cuenta y pide confirmar la
+eliminación permanente de sus datos relacionados. La cuenta de la sesión actual
+no se puede eliminar. La operación se realiza en una transacción.
+
+Los mensajes enviados a alumnos y padres o tutores tienen el botón
+**Descargar citatorio PDF** al abrirlos en Leídos y en Enviados. Al enviar un mensaje se abre la carpeta
+Enviados para poder descargarlo de inmediato. El documento
+incluye folio, fecha de emisión, remitente, destinatario, asunto y mensaje
+completo. Para convocar a una reunión, escribe fecha, hora y lugar en el cuerpo
+del mensaje.
+
+El PDF se descarga con una línea para firmar a mano al imprimirlo, un campo
+para el nombre y otro para la fecha de recepción. Solo el remitente y el
+destinatario pueden descargarlo con su sesión iniciada. También funciona con
+los mensajes anteriores dirigidos a alumnos y padres.
+
+Copia todos los archivos, incluidos `citatorio.php` y `pdf_citatorio.php`.
+El Dockerfile ya los incluye. Esta actualización no requiere nuevas tablas.

@@ -62,7 +62,7 @@ try {
 $u=$fatal?null:user(); ?><!doctype html>
 
 <html lang="es">
-    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?=h($pages[$p])?> · Conecta Escuela</title><link rel="stylesheet" href="assets/style.css?v=3">
+    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?=h($pages[$p])?> · Conecta Escuela</title><link rel="stylesheet" href="assets/style.css?v=4">
     </head><body<?php if($u): ?> data-account="<?=h($u['id'])?>" data-page="<?=h($p)?>"<?php endif; ?>>
 <?php if(!$u): ?>
 
@@ -194,6 +194,8 @@ $rec=recipients(); ?>
                     <h2>Escribir mensaje
                     </h2>
                     <p class="muted">Los destinatarios corresponden a tus grupos y a administración.
+                        Los mensajes dirigidos a alumnos y padres incluyen un citatorio PDF
+                        con espacio para firmar. Indica fecha, hora y lugar de la cita en el mensaje.
                     </p>
                     <form method="post"><?=csrf()?><input type="hidden" name="action" value="message"><label>Para<select name="destinatario_id" required><?=options(array_map(function($r){$r['nombre'].=' · '.ucfirst($r['rol']); return $r;},$rec))?></select></label><label>Asunto<input name="asunto" maxlength="150" required></label><label>Mensaje<textarea name="cuerpo" maxlength="5000" rows="6" required></textarea></label><button>Enviar mensaje</button>
                     </form><?php if(!$rec): ?>
@@ -298,6 +300,25 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
             </div>
 <?php elseif($p==='usuarios'): $users=rows('SELECT id,nombre,email,rol,activo FROM usuarios ORDER BY rol,nombre'); ?>
 
+<?php
+$deleteId=filter_var($_GET['eliminar']??null,FILTER_VALIDATE_INT);
+$deleteUser=$deleteId ? one('SELECT id,nombre,email FROM usuarios WHERE id=?',[$deleteId]) : null;
+if ($deleteUser && (int)$deleteUser['id']!==(int)$u['id']): ?>
+            <section class="card spaced">
+                <h2>Eliminar a <?=h($deleteUser['nombre'])?></h2>
+                <p><?=h($deleteUser['email'])?></p>
+                <p>Se eliminarán permanentemente la cuenta, sus mensajes y citatorios,
+                    avisos, actividades, reportes, calificaciones y vínculos relacionados.
+                    Si es docente, también sus clases asignadas y las calificaciones de esas clases.</p>
+                <form method="post">
+                    <?=csrf()?>
+                    <input type="hidden" name="action" value="user_delete">
+                    <input type="hidden" name="id" value="<?=h($deleteUser['id'])?>">
+                    <button class="danger">Confirmar eliminación</button>
+                    <a class="button secondary" href="index.php?p=usuarios">Cancelar</a>
+                </form>
+            </section>
+<?php endif; ?>
             <details class="card composer"><summary>＋ Crear usuario</summary>
                 <form method="post" class="form-grid"><?=csrf()?><input type="hidden" name="action" value="user_create"><label>Nombre completo<input name="nombre" maxlength="120" required></label><label>Correo<input name="email" type="email" maxlength="190" required></label><label>Rol<select name="rol"><option value="docente">Docente</option><option value="alumno">Alumno</option><option value="padre">Padre o tutor</option><option value="administrador">Administrador</option></select></label><label>Contraseña inicial<input name="password" type="password" minlength="10" maxlength="200" required autocomplete="new-password"></label>
                     <div><button>Crear usuario</button>
@@ -316,7 +337,9 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
                         <tbody><?php foreach($users as $r): ?>
                             <tr><td><?=h($r['nombre'])?></td><td><?=h($r['email'])?></td><td><?=h(ucfirst($r['rol']))?></td><td><span class="pill"><?=$r['activo']?'Activo':'Inactivo'?></span></td><td><?php if($r['id']!=$u['id']): ?>
                                 <form method="post"><?=csrf()?><input type="hidden" name="action" value="toggle_user"><input type="hidden" name="id" value="<?=h($r['id'])?>"><button class="secondary small"><?=$r['activo']?'Desactivar':'Activar'?></button>
-                                </form><?php endif; ?></td>
+                                </form>
+                                <a class="button danger small" href="index.php?p=usuarios&amp;eliminar=<?=h($r['id'])?>">Eliminar usuario</a>
+                                <?php endif; ?></td>
                             </tr><?php endforeach; ?>
                         </tbody>
                     </table>
@@ -401,6 +424,6 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
             <footer>Conecta Escuela · Comunicación que acompaña el aprendizaje.
             </footer>
         </div>
-    </main><script src="assets/live.js?v=3" defer></script><?php endif; ?>
+    </main><script src="assets/live.js?v=4" defer></script><?php endif; ?>
 </body>
 </html>

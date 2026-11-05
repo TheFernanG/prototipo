@@ -167,6 +167,38 @@ function handlePost(): void {
         requireRole('administrador'); $id=num('id'); if($id==user()['id']) throw new RuntimeException('No puedes desactivar tu propia cuenta.');
         q('UPDATE usuarios SET activo=1-activo WHERE id=?',[$id]); flash('Estado actualizado.'); redirectTo('usuarios');
     }
+    if ($action==='user_delete') {
+        requireRole('administrador');
+        $id=num('id');
+        if ($id==user()['id']) throw new RuntimeException('No puedes eliminar tu propia cuenta.');
+        $pdo=db();
+        $pdo->beginTransaction();
+        try {
+            // Serialize administrator removal and recheck the acting account.
+            rows("SELECT id FROM usuarios WHERE rol='administrador' ORDER BY id FOR UPDATE");
+            $actor=one("SELECT id FROM usuarios WHERE id=? AND rol='administrador' AND activo=1",
+                [user()['id']]);
+            if (!$actor) throw new RuntimeException('Tu cuenta ya no tiene permiso para eliminar usuarios.');
+            $target=one('SELECT id,nombre FROM usuarios WHERE id=? FOR UPDATE',[$id]);
+            if (!$target) throw new RuntimeException('El usuario ya fue eliminado.');
+            q('DELETE FROM calificaciones WHERE alumno_id=? OR autor_id=? OR asignacion_id IN
+                (SELECT id FROM asignaciones WHERE docente_id=?)',[$id,$id,$id]);
+            q('DELETE FROM reportes WHERE alumno_id=? OR autor_id=?',[$id,$id]);
+            q('DELETE FROM mensajes WHERE remitente_id=? OR destinatario_id=?',[$id,$id]);
+            q('DELETE FROM avisos WHERE autor_id=?',[$id]);
+            q('DELETE FROM eventos WHERE autor_id=?',[$id]);
+            q('DELETE FROM inscripciones WHERE alumno_id=?',[$id]);
+            q('DELETE FROM vinculos WHERE alumno_id=? OR padre_id=?',[$id,$id]);
+            q('DELETE FROM asignaciones WHERE docente_id=?',[$id]);
+            q('DELETE FROM usuarios WHERE id=?',[$id]);
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            throw $e;
+        }
+        flash('Usuario eliminado junto con sus registros relacionados.');
+        redirectTo('usuarios');
+    }
     if ($action==='group_create') { requireRole('administrador'); q('INSERT INTO grupos(nombre,ciclo) VALUES(?,?)',[val('nombre',80),val('ciclo',30)]); flash('Grupo creado.'); redirectTo('grupos'); }
     if ($action==='subject_create') { requireRole('administrador'); q('INSERT INTO materias(nombre) VALUES(?)',[val('nombre',100)]); flash('Materia creada.'); redirectTo('grupos'); }
     if ($action==='assignment') {
@@ -177,7 +209,13 @@ function handlePost(): void {
     if ($action==='link') { requireRole('administrador'); $p=num('padre_id'); $a=num('alumno_id'); validateUser($p,'padre'); validateUser($a,'alumno'); q('INSERT INTO vinculos(padre_id,alumno_id) VALUES(?,?)',[$p,$a]); flash('Familia vinculada.'); redirectTo('grupos'); }
     if ($action==='message') {
         $id=num('destinatario_id'); if(!in_array($id,array_map('intval',array_column(recipients(),'id')),true)) throw new RuntimeException('Destinatario fuera de tus grupos.');
-        q('INSERT INTO mensajes(remitente_id,destinatario_id,asunto,cuerpo) VALUES(?,?,?,?)',[user()['id'],$id,val('asunto',150),val('cuerpo',5000)]); flash('Mensaje enviado.','sent'); redirectTo('mensajes');
+        q('INSERT INTO mensajes(remitente_id,destinatario_id,asunto,cuerpo) VALUES(?,?,?,?)',
+            [user()['id'],$id,val('asunto',150),val('cuerpo',5000)]);
+        $messageId=(int)db()->lastInsertId();
+        flash('Mensaje enviado.','sent');
+        header('Location: index.php?p=mensajes&carpeta=enviados&mensaje='.$messageId.
+            '#mensaje-'.$messageId,true,303);
+        exit;
     }
     if ($action==='read') {
         $id=num('id');
