@@ -8,7 +8,7 @@ RUN apt-get update \
     && sed -i 's/<VirtualHost \*:80>/<VirtualHost *:10000>/' /etc/apache2/sites-available/000-default.conf \
     && printf 'display_errors=Off\nlog_errors=On\n' > /usr/local/etc/php/conf.d/production.ini
 
-COPY index.php app.php config.php bandeja.php recuperar.php recuperacion_logica.php /var/www/html/
+COPY index.php app.php config.php bandeja.php recuperar.php /var/www/html/
 COPY assets/ /var/www/html/assets/
 
 RUN set -e; for file in /var/www/html/*.php; do php -l "$file"; done

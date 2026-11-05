@@ -20,29 +20,11 @@ try {
     redirectTo('login');
     }
     if ($live) {
-        header('Content-Type: application/json; charset=utf-8');
-    
         $u=user();
-    
-        if (!$u || (string)$u['id']!==($_GET['account']??'')) { http_response_code(401);
-    exit;
-    }
-        $unread=unreadMessages((int)$u['id']);
-    
-        $html=null;
-    
-        if ($p==='mensajes') {
-            ob_start();
-    
-            require __DIR__.'/bandeja.php';
-    
-            $html=ob_get_clean();
-    
+        if (!$u || (string)$u['id']!==($_GET['account']??'')) {
+            http_response_code(401);
+            exit;
         }
-        echo json_encode(['unread'=>$unread,'dots'=>notificationDots((int)$u['id'],$unread),'html'=>$html], JSON_INVALID_UTF8_SUBSTITUTE);
-    
-        exit;
-    
     }
     db();
     
@@ -60,7 +42,7 @@ try {
     }
     if ($u=user()) {
         $uid=(int)$u['id'];
-        if (in_array($p,NOTIFICATION_SECTIONS,true)) seeNotifications($p,$uid);
+        if (!$live && in_array($p,NOTIFICATION_SECTIONS,true)) seeNotifications($p,$uid);
         $unread=unreadMessages($uid);
         $dots=notificationDots($uid,$unread);
     }
@@ -80,7 +62,7 @@ try {
 $u=$fatal?null:user(); ?><!doctype html>
 
 <html lang="es">
-    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?=h($pages[$p])?> · Conecta Escuela</title><link rel="stylesheet" href="assets/style.css">
+    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?=h($pages[$p])?> · Conecta Escuela</title><link rel="stylesheet" href="assets/style.css?v=3">
     </head><body<?php if($u): ?> data-account="<?=h($u['id'])?>" data-page="<?=h($p)?>"<?php endif; ?>>
 <?php if(!$u): ?>
 
@@ -103,14 +85,13 @@ $u=$fatal?null:user(); ?><!doctype html>
 <?php if($error): ?>
             <div class="alert error"><?=h($error)?>
             </div><?php endif; ?>
-<?php if(isset($_SESSION['flash'])): ?>
+<?php if(!$live && isset($_SESSION['flash'])): ?>
             <div class="alert"><?=h($_SESSION['flash'][1])?>
             </div><?php unset($_SESSION['flash']);
     endif; ?>
 
             <form method="post"><?=csrf()?><input type="hidden" name="action" value="login"><label>Correo electrónico<input type="email" name="email" required maxlength="190" autocomplete="username" placeholder="tu.correo@escuela.mx"></label><label>Contraseña<input type="password" name="password" required maxlength="200" autocomplete="current-password"></label><button>Entrar a mi espacio →</button>
             </form>
-            <p class="help"><a href="recuperar.php">¿Olvidaste tu contraseña?</a></p>
             <p class="help">Solicita una cuenta al administrador de tu escuela.</p>
         </section>
     </main>
@@ -135,7 +116,7 @@ $u=$fatal?null:user(); ?><!doctype html>
     </aside>
 
     <main class="main">
-        <header class="topbar"><span>Tu comunidad, conectada.</span><span><?=h(date('d/m/Y'))?> <span class="pill"><?=h(ucfirst($u['rol']))?></span></span>
+        <header class="topbar"><span id="connection-status" role="status" aria-live="polite">Actualización automática activa</span><span><?=h(date('d/m/Y'))?> <span class="pill"><?=h(ucfirst($u['rol']))?></span></span>
         </header>
         <div class="content">
             <div class="page-heading">
@@ -147,7 +128,7 @@ $u=$fatal?null:user(); ?><!doctype html>
 <?php if($error): ?>
             <div class="alert error" role="alert"><?=h($error)?>
             </div><?php endif; ?>
-<?php if(isset($_SESSION['flash'])): ?>
+<?php if(!$live && isset($_SESSION['flash'])): ?>
             <div class="alert <?=h($_SESSION['flash'][0])?>" role="status"><?php if($_SESSION['flash'][0]==='sent'): ?><span class="message-dot" aria-hidden="true">●</span> <?php endif; ?><?=h($_SESSION['flash'][1])?>
             </div><?php unset($_SESSION['flash']);
     endif; ?>
@@ -156,6 +137,7 @@ $u=$fatal?null:user(); ?><!doctype html>
     $news=rows("SELECT r.*,u.nombre autor,g.nombre grupo FROM avisos r JOIN usuarios u ON u.id=r.autor_id LEFT JOIN grupos g ON g.id=r.grupo_id WHERE $aud ORDER BY r.creado DESC LIMIT 4",$args);
     
 $events=rows("SELECT r.*,g.nombre grupo FROM eventos r LEFT JOIN grupos g ON g.id=r.grupo_id WHERE $aud AND r.fecha>=CURDATE() ORDER BY r.fecha LIMIT 4",$args); ?>
+            <div data-live="dashboard">
             <section class="welcome">
                 <div><span class="eyebrow">CADA DÍA ES UNA OPORTUNIDAD</span>
                     <h2>Hola, <?=h(explode(' ',$u['nombre'])[0])?>.
@@ -204,6 +186,7 @@ $events=rows("SELECT r.*,g.nombre grupo FROM eventos r LEFT JOIN grupos g ON g.i
                     </div>
                 </section>
             </div>
+            </div>
 <?php elseif($p==='mensajes'):
 $rec=recipients(); ?>
             <div class="columns">
@@ -226,7 +209,7 @@ $rec=recipients(); ?>
                         <?php endforeach; ?>
                     </nav>
                     <p class="muted">Se muestran hasta 100 mensajes por carpeta.</p>
-                    <div id="message-list"><?php require __DIR__.'/bandeja.php'; ?>
+                    <div id="message-list" data-live="messages"><?php require __DIR__.'/bandeja.php'; ?>
                     </div>
                 </section>
             </div>
@@ -243,7 +226,7 @@ $rec=recipients(); ?>
             </details><?php endif; ?>
             <p class="muted">Se muestran los últimos 100 registros. Las actividades están ordenadas de la fecha más reciente a la más antigua.
             </p>
-            <div class="record-grid"><?php if(!$records): ?>
+            <div class="record-grid" data-live="records"><?php if(!$records): ?>
                 <section class="card empty">Aún no hay <?=$isEvent?'actividades':'avisos'?>.
                 </section><?php endif;
     foreach($records as $r): ?><article class="card">
@@ -270,7 +253,7 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
                 </form>
             </details><?php endif; ?>
 
-            <section class="card">
+            <section class="card" data-live="grades">
                 <h2>Historial académico
                 </h2>
                 <p class="muted">Últimas 200 calificaciones. Para corregir un registro, su autor o administración puede eliminarlo y capturarlo nuevamente.
@@ -300,7 +283,7 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
                     </div>
                 </form>
             </details><?php endif; ?>
-            <div class="record-grid"><?php if(!$reports): ?>
+            <div class="record-grid" data-live="reports"><?php if(!$reports): ?>
                 <section class="card empty">Sin reportes registrados.
                 </section><?php endif;
     foreach($reports as $r): ?><article class="card">
@@ -321,7 +304,7 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
                     </div>
                 </form>
             </details>
-            <section class="card">
+            <section class="card" data-live="users">
                 <h2>Directorio escolar
                 </h2>
                 <div class="table-wrap">
@@ -376,7 +359,7 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
                     <form method="post"><?=csrf()?><input type="hidden" name="action" value="link"><label>Padre o tutor<select name="padre_id" required><?=options($parents)?></select></label><label>Hijo / alumno<select name="alumno_id" required><?=options(students())?></select></label><button>Vincular familia</button>
                     </form>
                 </section>
-                <section class="card">
+                <section class="card" data-live="groups">
                     <h2>Grupos disponibles
                     </h2><?php foreach(groups() as $g): ?>
                     <div class="feed"><strong><?=h($g['nombre'])?></strong><small>Ciclo <?=h($g['ciclo'])?></small>
@@ -385,22 +368,13 @@ $assign=role('administrador')?rows("SELECT a.id,CONCAT(g.nombre,' · ',m.nombre,
             </div>
 <?php $tables=[['asignaciones','Clases asignadas','SELECT a.id,CONCAT(g.nombre," · ",m.nombre," · ",u.nombre) nombre FROM asignaciones a JOIN grupos g ON g.id=a.grupo_id JOIN materias m ON m.id=a.materia_id JOIN usuarios u ON u.id=a.docente_id'],['inscripciones','Inscripciones','SELECT i.id,CONCAT(g.nombre," · ",u.nombre) nombre FROM inscripciones i JOIN grupos g ON g.id=i.grupo_id JOIN usuarios u ON u.id=i.alumno_id'],['vinculos','Familias vinculadas','SELECT v.id,CONCAT(p.nombre," → ",a.nombre) nombre FROM vinculos v JOIN usuarios p ON p.id=v.padre_id JOIN usuarios a ON a.id=v.alumno_id']];
     foreach($tables as [$table,$title,$sql]): ?>
-            <section class="card spaced">
+            <section class="card spaced" data-live="<?=h($table)?>">
                 <h2><?=h($title)?>
                 </h2><?php foreach(rows($sql) as $r): ?>
                 <div class="section-title feed"><span><?=h($r['nombre'])?></span><?=deleteForm($table,(int)$r['id'])?>
                 </div><?php endforeach; ?>
             </section><?php endforeach; ?>
-<?php elseif($p==='perfil'):
-try {
-    $preguntaGuardada = one('SELECT pregunta FROM recuperacion_cuenta WHERE usuario_id=?', [$u['id']])['pregunta'] ?? '';
-} catch (PDOException $e) {
-    if ($e->getCode() !== '42S02') {
-        throw $e;
-    }
-    $preguntaGuardada = '';
-}
-?>
+<?php elseif($p==='perfil'): ?>
             <div class="columns">
                 <section class="card">
                     <div class="avatar large"><?=h(strtoupper(substr($u['nombre'],0,1)))?>
@@ -422,32 +396,11 @@ try {
                         </p><button>Actualizar contraseña</button>
                     </form>
                 </section>
-                <section class="card">
-                    <h2>Pregunta de seguridad</h2>
-                    <?php if ($preguntaGuardada): ?>
-                        <p>Pregunta guardada: <strong><?=h(preguntasRecuperacion()[$preguntaGuardada])?></strong></p>
-                    <?php endif; ?>
-                    <p class="help">Configúrala para recuperar tu contraseña. Elige una respuesta que otras personas desconozcan.</p>
-                    <form method="post">
-                        <?=csrf()?>
-                        <input type="hidden" name="action" value="pregunta_recuperacion">
-                        <label>Pregunta
-                            <select name="pregunta" required>
-                                <?php foreach (preguntasRecuperacion() as $id => $texto): ?>
-                                    <option value="<?=h($id)?>" <?=$preguntaGuardada===$id?'selected':''?>><?=h($texto)?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </label>
-                        <label>Respuesta <input type="password" name="respuesta" maxlength="72" required></label>
-                        <label>Contraseña actual <input type="password" name="actual" maxlength="200" autocomplete="current-password" required></label>
-                        <button>Guardar pregunta</button>
-                    </form>
-                </section>
             </div><?php endif; ?>
 
             <footer>Conecta Escuela · Comunicación que acompaña el aprendizaje.
             </footer>
         </div>
-    </main><script src="assets/live.js?v=2" defer></script><?php endif; ?>
+    </main><script src="assets/live.js?v=3" defer></script><?php endif; ?>
 </body>
 </html>

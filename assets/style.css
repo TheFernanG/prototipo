@@ -982,3 +982,9 @@ body.session-check {
     gap: .75rem;
     margin-bottom: .5rem;
 }
+
+/* Keep section indicators visible in the compact navigation. */
+.sidebar nav a .message-dot:not([hidden]) {
+    display: inline-block;
+    flex-shrink: 0;
+}

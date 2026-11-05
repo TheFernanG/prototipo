@@ -98,18 +98,35 @@ Para restablecer una contraseña olvidada en esta práctica, un responsable con 
 
 ## Alcance
 
-Entrega académica local. Antes de usar datos reales o publicar en Internet se requiere configurar HTTPS, una cuenta MySQL con permisos limitados, respaldos y políticas de protección de datos de la escuela. No incluye notificaciones push, archivos adjuntos, chat en tiempo real ni aplicación móvil nativa.
+Entrega académica local. Antes de usar datos reales o publicar en Internet se requiere configurar HTTPS, una cuenta MySQL con permisos limitados, respaldos y políticas de protección de datos de la escuela. El panel consulta novedades automáticamente mientras permanece visible en el navegador.
 
 ## Logo, mensajes y cierre de sesión
 
 - Puedes personalizar el logo sustituyendo `assets/logo.svg`.
 - Con el sitio abierto, el navegador consulta los mensajes aproximadamente cada dos segundos. El punto en **Mensajes** aparece si hay mensajes sin leer. Al enviar, aparece un punto junto a **Mensaje enviado**.
 - Cerrar sesión elimina la sesión y su cookie. Si usas Atrás, las páginas privadas vuelven a comprobar el acceso.
-- Para actualizar una instalación existente, copia los archivos del proyecto. No hace falta volver a importar la base de datos. Conserva tu configuración local de `config.php`.
+- Para actualizar una instalación existente, copia los archivos del proyecto. Si falta la tabla de notificaciones, ejecuta `actualizar_notificaciones.sql`. Conserva tu configuración local de `config.php`.
 
-## Recuperación de contraseña
+## Actualización automática en computadora y celular
 
-- Instalación nueva: importa `base_de_datos.sql`. Instalación existente: importa únicamente `actualizar_recuperacion.sql` en phpMyAdmin.
-- Inicia sesión y guarda una pregunta y respuesta desde **Mi cuenta → Pregunta de seguridad**.
-- Cierra sesión, entra en **¿Olvidaste tu contraseña?** y escribe tu correo, pulsa **Mostrar mi pregunta** y contesta la pregunta de esa cuenta.
-- Con una respuesta correcta, la página genera un QR local con un código de un solo uso que vence en 10 minutos. En el mismo navegador el formulario se rellena con el código. Si lo escaneas con otro dispositivo, puedes copiar el texto del QR y pegarlo en el formulario.
+Mensajes, avisos escolares, seguimiento académico, comportamiento, calendario y
+el panel de inicio consultan los cambios aproximadamente cada dos segundos.
+Los puntos del menú también se muestran en pantallas pequeñas.
+Los formularios de captura conservan el texto durante estas actualizaciones.
+Los registros de usuarios y los listados de grupos también se actualizan.
+
+Mantén la página abierta, visible y con conexión. Si el teléfono bloquea la
+pantalla o el navegador suspende la pestaña, se sincroniza al volver.
+Estas son notificaciones dentro del sitio.
+
+La recuperación de contraseña y las preguntas de seguridad fueron retiradas.
+Para aplicar la actualización, reemplaza los archivos del proyecto y elimina
+`recuperacion_logica.php`, `assets/qr-recuperacion.js` y
+`assets/QR-LICENSE.txt` de la instalación anterior.
+Los enlaces antiguos de recuperación llevan al inicio de sesión.
+La tabla antigua de recuperación puede permanecer en una base existente.
+
+En Mensajes, abrir un recibido lo mueve a Leídos. En las otras secciones,
+las novedades se marcan como vistas al entrar. Si llegan más mientras estás
+dentro, aparece el punto y el contenido se actualiza. Al volver a entrar,
+se quita el punto de esas novedades.
