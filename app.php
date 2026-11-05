@@ -5,7 +5,7 @@ date_default_timezone_set($config['timezone']);
 ini_set('session.use_strict_mode','1');
 ini_set('session.use_only_cookies','1');
 session_name('comunidad_session');
-session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS']!=='off','httponly'=>true,'samesite'=>'Lax']);
+session_set_cookie_params(['lifetime'=>0,'path'=>'/','secure'=>getenv('RENDER') === 'true' || !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS']!=='off','httponly'=>true,'samesite'=>'Lax']);
 session_start();
 header('Content-Type: text/html; charset=utf-8');
 header('Cache-Control: no-store');
@@ -18,7 +18,12 @@ function db(): PDO {
     static $pdo;
     global $config;
     if (!$pdo) {
-        $pdo = new PDO("mysql:host={$config['host']};port={$config['port']};dbname={$config['database']};charset=utf8mb4",$config['username'],$config['password'],[PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false]);
+        $options = [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION,PDO::ATTR_DEFAULT_FETCH_MODE=>PDO::FETCH_ASSOC,PDO::ATTR_EMULATE_PREPARES=>false];
+        if ($config['ssl_ca']) {
+            $options[PDO::MYSQL_ATTR_SSL_CA] = $config['ssl_ca'];
+            $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = true;
+        }
+        $pdo = new PDO("mysql:host={$config['host']};port={$config['port']};dbname={$config['database']};charset=utf8mb4",$config['username'],$config['password'],$options);
         $pdo->exec("SET time_zone=".$pdo->quote(date('P')));
     }
     return $pdo;
