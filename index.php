@@ -193,9 +193,7 @@ $rec=recipients(); ?>
                 <section class="card">
                     <h2>Escribir mensaje
                     </h2>
-                    <p class="muted">Los destinatarios corresponden a tus grupos y a administración.
-                        Los mensajes dirigidos a alumnos y padres incluyen un citatorio PDF
-                        con espacio para firmar. Indica fecha, hora y lugar de la cita en el mensaje.
+                    <p class="muted">
                     </p>
                     <form method="post"><?=csrf()?><input type="hidden" name="action" value="message"><label>Para<select name="destinatario_id" required><?=options(array_map(function($r){$r['nombre'].=' · '.ucfirst($r['rol']); return $r;},$rec))?></select></label><label>Asunto<input name="asunto" maxlength="150" required></label><label>Mensaje<textarea name="cuerpo" maxlength="5000" rows="6" required></textarea></label><button>Enviar mensaje</button>
                     </form><?php if(!$rec): ?>
