@@ -40,7 +40,7 @@ function destroySession(): void {
     setcookie(session_name(),'',$cookie);
 }
 function unreadMessages(int $id): int {
-    return (int)one('SELECT COUNT(*) n FROM mensajes WHERE destinatario_id=? AND leido=0',[$id])['n'];
+    return (int)one('SELECT COUNT(*) n FROM mensajes m WHERE destinatario_id=? AND leido=0 AND NOT EXISTS (SELECT 1 FROM mensajes_eliminados e WHERE e.mensaje_id=m.id AND e.usuario_id=?)',[$id,$id])['n'];
 }
 function user(): ?array { static $u=false; if ($u===false) $u=isset($_SESSION['uid']) ? one('SELECT * FROM usuarios WHERE id=? AND activo=1',[$_SESSION['uid']]) : null; return $u; }
 function role(string ...$roles): bool { return user() && in_array(user()['rol'],$roles,true); }
@@ -132,6 +132,8 @@ function seeNotifications(string $section,int $id): void {
 function validateUser(int $id,string $rol): void { if (!one('SELECT id FROM usuarios WHERE id=? AND rol=? AND activo=1',[$id,$rol])) throw new RuntimeException('Usuario inválido para este rol.'); }
 function deleteForm(string $table,int $id): string { return '<form method="post" class="inline">'.csrf().'<input type="hidden" name="action" value="delete"><input type="hidden" name="table" value="'.h($table).'"><input type="hidden" name="id" value="'.$id.'"><button class="danger small">Eliminar</button></form>'; }
 
+require_once __DIR__.'/citatorios_logica.php';
+
 function handlePost(): void {
     checkCsrf(); $action=val('action',40);
     if ($action==='login') {
@@ -209,12 +211,42 @@ function handlePost(): void {
     if ($action==='link') { requireRole('administrador'); $p=num('padre_id'); $a=num('alumno_id'); validateUser($p,'padre'); validateUser($a,'alumno'); q('INSERT INTO vinculos(padre_id,alumno_id) VALUES(?,?)',[$p,$a]); flash('Familia vinculada.'); redirectTo('grupos'); }
     if ($action==='message') {
         $id=num('destinatario_id'); if(!in_array($id,array_map('intval',array_column(recipients(),'id')),true)) throw new RuntimeException('Destinatario fuera de tus grupos.');
-        q('INSERT INTO mensajes(remitente_id,destinatario_id,asunto,cuerpo) VALUES(?,?,?,?)',
-            [user()['id'],$id,val('asunto',150),val('cuerpo',5000)]);
-        $messageId=(int)db()->lastInsertId();
+        $subject=val('asunto',150);
+        $body=val('cuerpo',5000);
+        $recipient=one('SELECT id,nombre,rol FROM usuarios WHERE id=? AND activo=1',[$id]);
+        if (!$recipient) throw new RuntimeException('El destinatario ya no está disponible.');
+        $citation=in_array($recipient['rol'],['alumno','padre'],true) ? validateCitation($recipient) : null;
+        $pdo=db();
+        $pdo->beginTransaction();
+        try {
+            q('INSERT INTO mensajes(remitente_id,destinatario_id,asunto,cuerpo) VALUES(?,?,?,?)',
+                [user()['id'],$id,$subject,$body]);
+            $messageId=(int)$pdo->lastInsertId();
+            if ($citation) {
+                q('INSERT INTO citatorios(mensaje_id,alumno_nombre,docente_nombre,fecha_cita,hora_cita)
+                    VALUES(?,?,?,?,?)',array_merge([$messageId],$citation));
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) $pdo->rollBack();
+            throw $e;
+        }
         flash('Mensaje enviado.','sent');
         header('Location: index.php?p=mensajes&carpeta=enviados&mensaje='.$messageId.
             '#mensaje-'.$messageId,true,303);
+        exit;
+    }
+    if ($action==='message_delete') {
+        $id=num('id');
+        $folder=val('carpeta',20);
+        if (!in_array($folder,['entrada','leidos','enviados'],true)) $folder='entrada';
+        $message=one('SELECT id FROM mensajes WHERE id=? AND (remitente_id=? OR destinatario_id=?)',
+            [$id,user()['id'],user()['id']]);
+        if (!$message) throw new RuntimeException('Mensaje no disponible.');
+        q('INSERT INTO mensajes_eliminados(mensaje_id,usuario_id) VALUES(?,?)
+            ON DUPLICATE KEY UPDATE usuario_id=mensajes_eliminados.usuario_id',[$id,user()['id']]);
+        flash('Mensaje eliminado de tus carpetas.');
+        header('Location: index.php?p=mensajes&carpeta='.$folder,true,303);
         exit;
     }
     if ($action==='read') {

@@ -20,11 +20,13 @@ try {
         FROM mensajes m JOIN usuarios a ON a.id=m.remitente_id
         JOIN usuarios b ON b.id=m.destinatario_id
         WHERE m.id=? AND (m.remitente_id=? OR m.destinatario_id=?)
-            AND b.rol IN ('alumno','padre')",[$id,$u['id'],$u['id']]);
+            AND b.rol IN ('alumno','padre')
+            AND NOT EXISTS (SELECT 1 FROM mensajes_eliminados e WHERE e.mensaje_id=m.id AND e.usuario_id=?)",[$id,$u['id'],$u['id'],$u['id']]);
     if (!$message) {
         http_response_code(404);
         exit('Citatorio no disponible.');
     }
+    $message=array_merge($message,citationForMessage($message));
     $pdf=citatorioPdf($message);
     $_SESSION['last']=time();
     header('Content-Type: application/pdf');

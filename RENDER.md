@@ -71,3 +71,8 @@ su contenido. Los mensajes enviados se consultan en **Enviados**.
 Reemplaza los archivos y elimina los archivos de recuperación anteriores según
 `LEEME.md`. Despliega la nueva versión para activar las actualizaciones
 automáticas en computadora y celular.
+
+Para esta versión, ejecuta también `actualizar_mensajes_citatorios.sql` en la
+base existente antes del despliegue. Agrega las tablas de citatorios y de
+mensajes eliminados por cuenta. En una instalación nueva basta con importar
+`base_render.sql`.

@@ -142,8 +142,8 @@ Los mensajes enviados a alumnos y padres o tutores tienen el botón
 **Descargar citatorio PDF** al abrirlos en Leídos y en Enviados. Al enviar un mensaje se abre la carpeta
 Enviados para poder descargarlo de inmediato. El documento
 incluye folio, fecha de emisión, remitente, destinatario, asunto y mensaje
-completo. Para convocar a una reunión, escribe fecha, hora y lugar en el cuerpo
-del mensaje.
+completo. Para convocar a una reunión, selecciona la fecha y la hora de la cita.
+Puedes incluir el lugar en el cuerpo del mensaje.
 
 El PDF se descarga con una línea para firmar a mano al imprimirlo, un campo
 para el nombre y otro para la fecha de recepción. Solo el remitente y el
@@ -151,4 +151,32 @@ destinatario pueden descargarlo con su sesión iniciada. También funciona con
 los mensajes anteriores dirigidos a alumnos y padres.
 
 Copia todos los archivos, incluidos `citatorio.php` y `pdf_citatorio.php`.
-El Dockerfile ya los incluye. Esta actualización no requiere nuevas tablas.
+El Dockerfile ya los incluye. Ejecuta `actualizar_mensajes_citatorios.sql` para agregar las tablas necesarias.
+
+## Formato del citatorio y eliminación de mensajes
+
+Antes de usar esta versión con una base existente, ejecuta
+`actualizar_mensajes_citatorios.sql` una vez en esa base. Para una instalación
+nueva, las tablas ya están incluidas en `base_render.sql`.
+
+Al elegir un alumno o padre como destinatario se muestran los datos del
+citatorio. Elige la fecha y hora de la cita. El alumno se selecciona
+automáticamente cuando hay una sola opción. Para un padre con varios hijos,
+elige al que corresponde. Si envía un docente, se utiliza su cuenta como
+docente del citatorio. Administración puede elegir un docente asignado al grupo
+del alumno. Las relaciones se verifican también en el servidor.
+
+El PDF usa un marco, el título CITATORIO, el texto dirigido al padre de familia,
+el día, mes y año completos, la hora, el nombre del alumno, el motivo,
+ATENTAMENTE, el nombre del docente y la línea para la firma del padre.
+Los nombres quedan guardados en el citatorio al enviar el mensaje.
+La firma se coloca a mano al imprimir el PDF.
+
+Los mensajes anteriores conservan su descarga con el formato nuevo. Cuando
+falta una fecha de cita o la cuenta tiene varios alumnos o docentes posibles,
+el documento indica que ese dato está por confirmar.
+
+**Eliminar mensaje** está disponible en Entrada, Leídos y Enviados. La
+eliminación afecta solo las carpetas de la cuenta que pulsa el botón. La otra
+persona conserva su copia. Los eliminados dejan de contarse como mensajes sin
+leer y su citatorio deja de estar disponible para esa cuenta.

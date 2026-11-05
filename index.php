@@ -62,7 +62,7 @@ try {
 $u=$fatal?null:user(); ?><!doctype html>
 
 <html lang="es">
-    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?=h($pages[$p])?> · Conecta Escuela</title><link rel="stylesheet" href="assets/style.css?v=4">
+    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?=h($pages[$p])?> · Conecta Escuela</title><link rel="stylesheet" href="assets/style.css?v=5">
     </head><body<?php if($u): ?> data-account="<?=h($u['id'])?>" data-page="<?=h($p)?>"<?php endif; ?>>
 <?php if(!$u): ?>
 
@@ -188,14 +188,54 @@ $events=rows("SELECT r.*,g.nombre grupo FROM eventos r LEFT JOIN grupos g ON g.i
             </div>
             </div>
 <?php elseif($p==='mensajes'):
-$rec=recipients(); ?>
+$rec=recipients();
+$citationChoices=citationChoices();
+$draft=$_SERVER['REQUEST_METHOD']==='POST' && ($_POST['action']??'')==='message' ? $_POST : []; ?>
             <div class="columns">
                 <section class="card">
                     <h2>Escribir mensaje
                     </h2>
                     <p class="muted">
                     </p>
-                    <form method="post"><?=csrf()?><input type="hidden" name="action" value="message"><label>Para<select name="destinatario_id" required><?=options(array_map(function($r){$r['nombre'].=' · '.ucfirst($r['rol']); return $r;},$rec))?></select></label><label>Asunto<input name="asunto" maxlength="150" required></label><label>Mensaje<textarea name="cuerpo" maxlength="5000" rows="6" required></textarea></label><button>Enviar mensaje</button>
+                    <form method="post" id="message-composer">
+                        <?=csrf()?><input type="hidden" name="action" value="message">
+                        <label>Para
+                            <select name="destinatario_id" required>
+                                <option value="">Seleccionar…</option>
+                                <?php foreach($rec as $recipient): ?>
+                                    <option value="<?=h($recipient['id'])?>" data-role="<?=h($recipient['rol'])?>" <?=($draft['destinatario_id']??'')==$recipient['id']?'selected':''?>><?=h($recipient['nombre'])?> · <?=h(ucfirst($recipient['rol']))?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </label>
+                        <label>Asunto<input name="asunto" maxlength="150" value="<?=h($draft['asunto']??'')?>" required></label>
+                        <label>Mensaje / motivo del citatorio<textarea name="cuerpo" maxlength="5000" rows="6" required><?=h($draft['cuerpo']??'')?></textarea></label>
+                        <?php if(role('administrador','docente')): ?>
+                        <fieldset id="citation-fields">
+                            <legend>Datos del citatorio para alumnos y padres</legend>
+                            <label>Alumno
+                                <select name="cita_alumno_id">
+                                    <option value="">Seleccionar alumno…</option>
+                                    <?php foreach($citationChoices['students'] as $student): ?>
+                                    <option value="<?=h($student['id'])?>" data-parents="<?=h(implode(',',$student['parents']))?>" data-teachers="<?=h(implode(',',$student['teachers']))?>" <?=($draft['cita_alumno_id']??'')==$student['id']?'selected':''?>><?=h($student['nombre'])?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <label>Docente
+                                <select name="cita_docente_id">
+                                    <option value="">Seleccionar docente…</option>
+                                    <?php foreach($citationChoices['teachers'] as $teacher): ?>
+                                    <option value="<?=h($teacher['id'])?>" <?=($draft['cita_docente_id']??'')==$teacher['id']?'selected':''?>><?=h($teacher['nombre'])?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </label>
+                            <div class="form-grid">
+                                <label>Fecha de la cita<input type="date" name="fecha_cita" value="<?=h($draft['fecha_cita']??date('Y-m-d'))?>"></label>
+                                <label>Hora de la cita<input type="time" name="hora_cita" value="<?=h($draft['hora_cita']??'')?>"></label>
+                            </div>
+                            <p class="help">Los nombres se toman de las cuentas registradas. Para un padre con varios hijos, selecciona al alumno correspondiente. Si faltan opciones, revisa Grupos y familias.</p>
+                        </fieldset>
+                        <?php endif; ?>
+                        <button>Enviar mensaje</button>
                     </form><?php if(!$rec): ?>
                     <p class="help">No hay destinatarios disponibles. Solicita la asignación de tu grupo.
                     </p><?php endif; ?>
@@ -422,6 +462,7 @@ if ($deleteUser && (int)$deleteUser['id']!==(int)$u['id']): ?>
             <footer>Conecta Escuela · Comunicación que acompaña el aprendizaje.
             </footer>
         </div>
-    </main><script src="assets/live.js?v=4" defer></script><?php endif; ?>
+    </main><script src="assets/live.js?v=5" defer></script><?php endif; ?>
+<?php if($u && $p==='mensajes'): ?><script src="assets/messages.js?v=1" defer></script><?php endif; ?>
 </body>
 </html>

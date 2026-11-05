@@ -988,3 +988,23 @@ body.session-check {
     display: inline-block;
     flex-shrink: 0;
 }
+
+#citation-fields {
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 16px 0;
+    min-width: 0;
+}
+
+#citation-fields[hidden] {
+    display: none;
+}
+
+.message-preview {
+    flex-wrap: wrap;
+}
+
+.message-preview form {
+    margin-top: 0;
+}
