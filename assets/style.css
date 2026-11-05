@@ -1,11 +1,16 @@
 :root {
-    --ink: #172e3b;
-    --muted: #647887;
-    --line: #e2e9ec;
-    --blue: #156b7b;
-    --dark: #113b47;
-    --mint: #e7f5ef;
-    --bg: #f3f6f8
+    --ink: #163440;
+    --muted: #526a75;
+    --line: #d5e4e6;
+    --blue: #087a85;
+    --dark: #063f50;
+    --mint: #edf7e3;
+    --bg: #f8f7ef;
+    --turquoise: #12b5bc;
+    --lime: #8bc441;
+    --cream: #fff9ed;
+    --sidebar-width: 286px;
+    --shadow: 0 2px 3px rgba(6, 63, 80, .06), 0 12px 28px rgba(6, 63, 80, .09)
 }
 
 * {
@@ -14,9 +19,10 @@
 
 body {
     margin: 0;
-    font: 15px/1.55 'Segoe UI',Arial,sans-serif;
+    font: 17px/1.65 'Segoe UI', Arial, sans-serif;
     color: var(--ink);
-    background: var(--bg)
+    background: radial-gradient(ellipse at 100% 0, #e3f5f1 0, transparent 48%), var(--bg);
+    overflow-wrap: break-word
 }
 
 a {
@@ -29,45 +35,56 @@ button,input,select,textarea {
 }
 
 button,.button {
-    display: inline-block;
-    border: 0;
-    border-radius: 9px;
-    background: var(--blue);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 46px;
+    border: 1px solid #096370;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #087d89, #08717d);
     color: #fff;
-    padding: 12px 18px;
+    padding: 12px 20px;
     cursor: pointer;
-    font-weight: 600;
-    line-height: 1.35;
-    text-align: center
+    font-weight: 650;
+    line-height: 1.4;
+    text-align: center;
+    box-shadow: 0 3px 0 #055260, 0 7px 13px rgba(6, 63, 80, .13);
+    transition: transform .15s ease, box-shadow .15s ease
 }
 
 button:hover,.button:hover {
-    filter: brightness(.94)
+    transform: translateY(-1px);
+    box-shadow: 0 4px 0 #055260, 0 9px 16px rgba(6, 63, 80, .16)
 }
 
 button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,summary:focus-visible {
-    outline: 3px solid #e6ac4e;
+    outline: 3px solid #679c2f;
     outline-offset: 3px
 }
 
 .secondary {
-    background: #eaf1f4;
-    color: var(--dark)
+    background: linear-gradient(180deg, #fff, #e8f4f3);
+    border-color: #b7d4d7;
+    color: var(--dark);
+    box-shadow: 0 3px 0 #c4dadd, 0 6px 12px rgba(6, 63, 80, .07)
 }
 
 .ghost {
-    background: transparent;
-    color: #dce9ec
+    background: rgba(255, 255, 255, .06);
+    color: #effbfa;
+    box-shadow: none
 }
 
 .danger {
-    color: #a43539;
-    background: #fff0f0
+    color: #983536;
+    background: linear-gradient(180deg, #fff8f7, #fce9e6);
+    border-color: #ecc9c5;
+    box-shadow: 0 3px 0 #e9c6c1, 0 6px 12px rgba(125, 40, 40, .06)
 }
 
 .small {
-    font-size: 12px;
-    padding: 7px 11px
+    font-size: 14px
 }
 
 .inline {
@@ -76,15 +93,18 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 }
 
 .sidebar {
-    width: 250px;
-    background: var(--dark);
+    width: var(--sidebar-width);
+    background: radial-gradient(ellipse at 0 0, #0a6871 0, transparent 65%),
+        linear-gradient(165deg, #064b5b, #073747);
     position: fixed;
     inset: 0 auto 0 0;
     color: #fff;
-    padding: 28px 22px;
+    padding: 26px 20px 22px;
     display: flex;
     flex-direction: column;
-    overflow: auto
+    overflow: auto;
+    box-shadow: 5px 0 25px rgba(6, 40, 52, .12);
+    z-index: 20
 }
 
 .brand {
@@ -98,89 +118,102 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 }
 
 .brand-symbol {
-    width: 112px;
-    height: 112px;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    box-shadow: 0 5px 16px rgba(0, 0, 0, .16)
 }
 
 .login-story .brand-symbol {
-    width: clamp(135px, 21vw, 220px);
+    width: clamp(140px, 16vw, 190px);
     height: auto;
-    clip-path: circle(46%);
+    clip-path: circle(49%)
 }
 
 .brand-sub {
-    font-size: 9px;
-    letter-spacing: 3px;
+    font-size: 11px;
+    letter-spacing: 2.5px;
     position: absolute;
-    left: 121px;
-    top: 67px;
+    left: 100px;
+    top: 56px
 }
 
 .workspace-label {
-    font-size: 10px;
-    color: #8daeb7;
-    letter-spacing: 1.5px;
-    margin: 48px 10px 14px
+    font-size: 12px;
+    color: #b3d6d5;
+    letter-spacing: 1.4px;
+    margin: 30px 12px 14px
 }
 
-nav {
+.sidebar nav {
     display: grid;
-    gap: 5px
+    gap: 7px
 }
 
-nav a {
-    color: #c1d2d8;
-    padding: 12px 11px;
-    border-radius: 9px;
-    font-size: 13px;
+.sidebar nav a {
+    color: #e0f0f0;
+    padding: 12px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    font-size: 16px;
+    line-height: 1.45;
+    min-height: 48px;
     display: flex;
     align-items: center;
-    gap: 12px
+    gap: 10px
 }
 
-nav a span {
-    font-size: 19px;
-    width: 21px;
+.sidebar nav a > span:first-child {
+    font-size: 20px;
+    width: 22px;
+    flex: none;
     text-align: center
 }
 
-nav a.active {
-    background: #265563;
-    color: #fff
+.sidebar nav a.active {
+    background: linear-gradient(135deg, #e6f6d5, #d9f3e7);
+    color: #123d43;
+    border-color: #b5de88;
+    box-shadow: inset 4px 0 0 var(--lime), 0 4px 12px rgba(0, 0, 0, .1);
+    font-weight: 700
 }
 
-nav a:hover {
-    background: #204c59
+.sidebar nav a:hover {
+    background: rgba(255, 255, 255, .12);
+    color: #fff
 }
 
 .sidebar-bottom {
     margin-top: auto;
-    padding-top: 45px;
+    padding-top: 28px;
     display: flex;
-    gap: 10px;
-    align-items: center
+    gap: 12px;
+    align-items: center;
+    min-width: 0
 }
 
 .sidebar-bottom strong {
-    font-size: 12px;
+    font-size: 15px;
     display: block
 }
 
 .sidebar-bottom small {
-    color: #a5c2ca;
-    font-size: 11px
+    color: #b9d8dc;
+    font-size: 14px
 }
 
 .avatar {
-    height: 37px;
-    width: 37px;
+    height: 44px;
+    width: 44px;
     flex-shrink: 0;
-    background: #d0eadf;
-    color: #24594b;
+    background: linear-gradient(135deg, #d3efaf, #bcece2);
+    color: #174b49;
+    border: 1px solid #acd59e;
     border-radius: 50%;
     display: grid;
     place-items: center;
-    font-weight: 700
+    font-weight: 700;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 3px 8px rgba(6, 63, 80, .1)
 }
 
 .large {
@@ -195,23 +228,27 @@ nav a:hover {
 
 .logout button {
     width: 100%;
-    border: 1px solid #38616d
+    border: 1px solid #719c9e
 }
 
 .main {
-    margin-left: 250px
+    margin-left: var(--sidebar-width);
+    min-width: 0
 }
 
 .topbar {
-    height: 75px;
-    background: #fff;
+    min-height: 76px;
+    background: rgba(255, 253, 247, .95);
     border-bottom: 1px solid var(--line);
     display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
     justify-content: space-between;
     align-items: center;
-    padding: 0 40px;
+    padding: 16px 32px;
     color: var(--muted);
-    font-size: 12px
+    font-size: 14px;
+    box-shadow: 0 3px 12px rgba(6, 63, 80, .04)
 }
 
 .topbar .pill {
@@ -219,16 +256,18 @@ nav a:hover {
 }
 
 .content {
-    max-width: 1440px;
+    max-width: 1560px;
     margin: auto;
-    padding: 34px 40px
+    padding: 34px 32px 28px
 }
 
 .page-heading {
     display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 25px
+    margin-bottom: 28px
 }
 
 h1,h2,h3,p {
@@ -236,26 +275,29 @@ h1,h2,h3,p {
 }
 
 h1 {
-    font-size: 29px;
+    font-size: clamp(29px, 2.5vw, 36px);
+    line-height: 1.2;
     margin-bottom: 0;
     letter-spacing: -.6px
 }
 
 h2 {
-    font-size: 19px;
+    font-size: 23px;
+    line-height: 1.3;
     letter-spacing: -.2px;
-    margin-bottom: 13px
+    margin-bottom: 16px
 }
 
 h3 {
-    font-size: 15px;
-    margin-bottom: 7px
+    font-size: 18px;
+    line-height: 1.4;
+    margin-bottom: 8px
 }
 
 .eyebrow {
-    font-size: 10px;
-    letter-spacing: 1.8px;
-    color: var(--blue);
+    font-size: 12px;
+    letter-spacing: 1.5px;
+    color: #096f7a;
     font-weight: 750
 }
 
@@ -264,31 +306,35 @@ h3 {
 }
 
 small {
-    font-size: 12px
+    font-size: 14px
 }
 
 .help {
-    font-size: 12px;
-    margin-top: 18px
+    font-size: 15px;
+    margin-top: 16px
 }
 
 label {
     display: block;
-    font-weight: 600;
-    font-size: 13px;
-    margin: 15px 0
+    font-weight: 650;
+    font-size: 16px;
+    margin: 16px 0
 }
 
 input,select,textarea {
     display: block;
     width: 100%;
-    background: #fff;
-    border: 1px solid #cfdbdf;
-    border-radius: 8px;
-    padding: 11px 12px;
+    min-height: 48px;
+    font-size: 16px;
+    font-weight: 400;
+    background: #fffefa;
+    border: 1px solid #b8d1d4;
+    border-radius: 11px;
+    padding: 12px 14px;
     color: var(--ink);
-    margin-top: 7px;
-    min-width: 0
+    margin-top: 8px;
+    min-width: 0;
+    box-shadow: inset 0 2px 4px rgba(6, 63, 80, .055)
 }
 
 textarea {
@@ -302,7 +348,7 @@ form {
 
 .form-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0 20px;
     margin-top: 20px
 }
@@ -312,35 +358,40 @@ form {
 }
 
 .card {
-    background: #fff;
+    background: linear-gradient(150deg, #fff, #fffefa);
     border: 1px solid var(--line);
-    border-radius: 14px;
-    padding: 25px;
-    min-width: 0
+    border-top: 3px solid #b8ded5;
+    border-radius: 20px;
+    padding: 28px;
+    min-width: 0;
+    box-shadow: var(--shadow)
 }
 
 .columns {
     display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    gap: 24px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px;
     align-items: start
 }
 
 .record-grid {
     display: grid;
-    grid-template-columns: repeat(2,minmax(0,1fr));
-    gap: 22px
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+    gap: 24px
 }
 
 .welcome {
-    border-radius: 16px;
-    padding: 34px;
-    background: #e1f0ed;
+    border: 1px solid #c6dfb2;
+    border-radius: 22px;
+    padding: 32px;
+    background: radial-gradient(ellipse at 100% 0, #d3f0e6, transparent 65%),
+        linear-gradient(120deg, #f0f7df, #e3f2e8);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 30px;
-    margin-bottom: 25px
+    gap: 24px;
+    margin-bottom: 28px;
+    box-shadow: var(--shadow)
 }
 
 .welcome .eyebrow {
@@ -348,14 +399,15 @@ form {
 }
 
 .welcome h2 {
-    font-size: 32px;
-    margin: 12px 0 8px
+    font-size: clamp(28px, 2.6vw, 36px);
+    line-height: 1.2;
+    margin: 12px 0
 }
 
 .welcome p {
-    color: #4b6e68;
-    max-width: 440px;
-    font-size: 14px
+    color: #3e6058;
+    max-width: 540px;
+    font-size: 17px
 }
 
 .welcome .button {
@@ -363,17 +415,19 @@ form {
 }
 
 .welcome-art {
-    width: 210px;
+    width: 170px;
     height: 165px;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     position: relative;
-    background: #cce5db;
-    border-radius: 90px 90px 20px 20px;
-    transform: rotate(-5deg);
-    flex-shrink: 0
+    background: linear-gradient(145deg, #c7eaa7, #bce7df);
+    border: 1px solid #add2bb;
+    border-radius: 85px 85px 24px 24px;
+    transform: rotate(-4deg);
+    flex-shrink: 0;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, .6), 0 9px 18px rgba(6, 63, 80, .12)
 }
 
 .welcome-art strong {
@@ -391,48 +445,54 @@ form {
 }
 
 .welcome-art small {
-    font-size: 11px;
-    letter-spacing: 1px;
-    color: #397c6c
+    font-size: 13px;
+    letter-spacing: .5px;
+    color: #285b4b
 }
 
 .stats {
     display: grid;
-    grid-template-columns: repeat(3,1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 20px;
-    margin-bottom: 25px
+    margin-bottom: 28px
 }
 
 .stats a {
-    background: #fff;
+    background: linear-gradient(145deg, #fff, #f7fcf6);
     border: 1px solid var(--line);
-    padding: 21px 24px;
-    border-radius: 13px;
+    border-top: 4px solid var(--turquoise);
+    padding: 22px;
+    border-radius: 18px;
     color: inherit;
     display: flex;
-    flex-direction: column
+    flex-direction: column;
+    min-width: 0;
+    box-shadow: var(--shadow)
 }
 
 .stats a span {
-    font-size: 12px;
+    font-size: 16px;
+    font-weight: 600;
     color: var(--muted)
 }
 
 .stats strong {
-    font-size: 33px;
-    margin: 7px 0;
+    font-size: 36px;
+    color: var(--dark);
+    margin: 9px 0;
     line-height: 1.2
 }
 
 .stats small {
-    font-size: 11px
+    font-size: 14px
 }
 
 .section-title {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 15px
+    gap: 12px
 }
 
 .section-title h2 {
@@ -440,8 +500,8 @@ form {
 }
 
 .section-title>a {
-    font-size: 11px;
-    white-space: nowrap
+    font-size: 15px;
+    font-weight: 600
 }
 
 .feed {
@@ -458,7 +518,7 @@ form {
 }
 
 .feed p {
-    font-size: 13px;
+    font-size: 16px;
     color: var(--muted);
     margin-bottom: 12px
 }
@@ -469,12 +529,14 @@ form {
 
 .pill {
     display: inline-block;
-    background: #e8f3f1;
-    border-radius: 6px;
-    color: #3e746c;
-    padding: 4px 9px;
-    font-size: 10px;
-    font-weight: 650
+    background: #e7f3df;
+    border: 1px solid #c7deb8;
+    border-radius: 8px;
+    color: #315d33;
+    padding: 5px 10px;
+    font-size: 13px;
+    font-weight: 650;
+    max-width: 100%
 }
 
 .clamp {
@@ -493,37 +555,43 @@ form {
 }
 
 .event-mini h3 {
-    margin-bottom: 4px;
-    font-size: 13px
+    margin-bottom: 6px;
+    font-size: 17px
 }
 
 .event-mini small {
-    font-size: 11px
+    font-size: 14px
 }
 
 .date-tile {
-    background: #f0f5f7;
-    border-radius: 10px;
-    min-width: 57px;
-    padding: 8px;
+    background: linear-gradient(150deg, #e6f7f5, #d9efec);
+    border: 1px solid #bbdcd9;
+    border-radius: 12px;
+    min-width: 76px;
+    flex-shrink: 0;
+    padding: 10px;
     text-align: center;
-    font-size: 23px;
-    font-weight: 650
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--dark);
+    box-shadow: 0 3px 0 #c5ded9
 }
 
 .date-tile small {
     display: block;
-    font-size: 9px;
-    font-weight: 400
+    font-size: 12px;
+    font-weight: 500;
+    white-space: nowrap
 }
 
 .note {
-    background: #fbf6e8;
-    border-radius: 10px;
+    background: var(--cream);
+    border: 1px solid #e5dcc2;
+    border-radius: 14px;
     padding: 20px;
     margin-top: 24px;
-    font-size: 12px;
-    color: #7b6840
+    font-size: 16px;
+    color: #685a36
 }
 
 .note p {
@@ -545,9 +613,9 @@ form {
 
 .empty {
     text-align: center;
-    padding: 35px;
+    padding: 32px 20px;
     color: var(--muted);
-    font-size: 14px
+    font-size: 16px
 }
 
 .composer {
@@ -576,17 +644,19 @@ form {
 
 .message summary strong {
     display: block;
-    font-size: 14px;
-    margin: 8px 0 4px
+    font-size: 18px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+    margin: 8px 0 6px
 }
 
 .message summary small {
     display: block;
-    font-size: 11px
+    font-size: 14px
 }
 
 .message p {
-    font-size: 14px;
+    font-size: 17px;
     margin-top: 16px
 }
 
@@ -595,34 +665,40 @@ form {
 }
 
 .table-wrap {
-    overflow-x: auto
+    overflow-x: auto;
+    max-width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    scrollbar-color: #87b7b6 #eef5f3
 }
 
 table {
     border-collapse: collapse;
     width: 100%;
+    min-width: 660px;
     text-align: left;
-    font-size: 13px
+    font-size: 15px
 }
 
 th {
-    color: var(--muted);
-    font-size: 11px;
-    font-weight: 650;
-    background: #f6f9fa;
+    color: #335763;
+    font-size: 14px;
+    font-weight: 700;
+    background: #eaf4ef;
     white-space: nowrap
 }
 
 th,td {
-    padding: 15px 12px;
+    padding: 16px 14px;
     border-bottom: 1px solid var(--line);
-    vertical-align: top
+    vertical-align: top;
+    overflow-wrap: anywhere
 }
 
 td small {
     display: block;
-    margin-top: 4px;
-    font-size: 11px
+    margin-top: 5px;
+    font-size: 14px
 }
 
 td.pre {
@@ -644,30 +720,34 @@ td.pre {
 }
 
 .event-date {
-    font-size: 13px;
+    font-size: 16px;
+    font-weight: 600;
     color: var(--blue)
 }
 
 footer {
-    font-size: 11px;
-    color: #8a9ba5;
-    padding: 35px 0 5px;
+    font-size: 14px;
+    color: var(--muted);
+    padding: 34px 0 10px;
     text-align: center
 }
 
 .login-layout {
     min-height: 100vh;
     display: grid;
-    grid-template-columns: 1fr 1fr
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    padding-right: 40px
 }
 
 .login-story {
-    background: var(--dark);
+    background: radial-gradient(ellipse at 0 0, #0a747b, transparent 70%),
+        linear-gradient(155deg, #064d5b, #073747);
     color: white;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 50px 65px;
+    padding: 46px;
     min-height: 100vh
 }
 
@@ -676,20 +756,20 @@ footer {
 }
 
 .login-story h1 {
-    font-size: 56px;
-    line-height: 1.13;
-    letter-spacing: -2px;
-    margin: 22px 0
+    font-size: clamp(38px, 4vw, 58px);
+    line-height: 1.12;
+    letter-spacing: -1.4px;
+    margin: 24px 0
 }
 
 .login-story p {
-    color: #bed4da;
-    max-width: 400px;
-    font-size: 16px
+    color: #d4e8e7;
+    max-width: 480px;
+    font-size: 18px
 }
 
 .login-story>small {
-    color: #8dafb9
+    color: #c0d8d9
 }
 
 .story-tags {
@@ -700,24 +780,29 @@ footer {
 }
 
 .story-tags span {
-    font-size: 11px;
-    padding: 7px 12px;
-    border: 1px solid #416772;
+    font-size: 14px;
+    padding: 8px 14px;
+    border: 1px solid #78a9a8;
     border-radius: 30px;
-    color: #c7e0df
+    color: #e1f3e3
 }
 
 .login-card {
     align-self: center;
-    padding: 60px;
-    max-width: 550px;
+    padding: 38px;
+    max-width: 560px;
     width: 100%;
-    margin: auto
+    margin: auto;
+    border: 1px solid var(--line);
+    border-top: 5px solid var(--lime);
+    border-radius: 24px;
+    background: #fffefa;
+    box-shadow: var(--shadow)
 }
 
 .login-card h2 {
-    font-size: 32px;
-    margin: 15px 0 8px
+    font-size: 34px;
+    margin: 15px 0 12px
 }
 
 .login-card form {
@@ -730,212 +815,266 @@ footer {
 }
 
 .login-card .muted {
-    font-size: 14px
+    font-size: 17px
 }
 
-@media(min-width:1500px) {
-    .content {
-        padding-top: 45px
-    }
-
-}
-
-@media(max-width:1100px) {
-    .sidebar {
-        width: 220px;
-        padding: 25px 16px
-    }
-
-    .main {
-        margin-left: 220px
-    }
-
-    .content {
-        padding: 28px 24px
-    }
-
-    .topbar {
-        padding: 0 24px
-    }
-
+@media (max-width: 1200px) {
     .columns {
-        grid-template-columns: 1fr
-    }
-
-    .login-story {
-        padding: 40px
-    }
-
-    .login-story h1 {
-        font-size: 43px
-    }
-
-    .login-card {
-        padding: 35px
-    }
-
-    .welcome-art {
-        width: 150px;
-        height: 150px
-    }
-
-}
-
-@media(max-width:700px) {
-    .sidebar {
-        position: static;
-        width: 100%;
-        padding: 18px;
-        display: block
-    }
-
-    .sidebar .brand-symbol {
-        width: 76px;
-        height: 76px;
-    }
-
-    .sidebar .brand {
-        font-size: 20px
-    }
-
-    .brand-sub {
-        display: none
-    }
-
-    .workspace-label,.sidebar-bottom {
-        display: none
-    }
-
-    nav {
-        display: flex;
-        overflow: auto;
-        margin-top: 16px;
-        padding-bottom: 5px;
-        gap: 7px
-    }
-
-    nav a {
-        white-space: nowrap;
-        padding: 8px 10px;
-        font-size: 12px
-    }
-
-    nav a span {
-        display: none
-    }
-
-    .logout {
-        position: absolute;
-        right: 15px;
-        top: 17px;
-        margin: 0
-    }
-
-    .logout button {
-        padding: 8px 10px;
-        font-size: 11px
-    }
-
-    .main {
-        margin: 0
-    }
-
-    .topbar {
-        height: 50px;
-        padding: 0 18px;
-        font-size: 10px
+        grid-template-columns: minmax(0, 1fr);
     }
 
     .content {
-        padding: 23px 16px
-    }
-
-    .page-heading h1 {
-        font-size: 24px
-    }
-
-    .page-heading>.button {
-        display: none
-    }
-
-    .welcome {
-        padding: 24px
-    }
-
-    .welcome h2 {
-        font-size: 27px
+        padding: 28px 24px;
     }
 
     .welcome-art {
-        display: none
-    }
-
-    .stats {
-        gap: 9px
-    }
-
-    .stats a {
-        padding: 15px 10px
-    }
-
-    .stats a span {
-        font-size: 10px
-    }
-
-    .stats strong {
-        font-size: 26px
-    }
-
-    .stats small {
-        font-size: 9px
-    }
-
-    .record-grid,.form-grid {
-        grid-template-columns: 1fr
-    }
-
-    .card {
-        padding: 20px
+        width: 140px;
+        height: 145px;
     }
 
     .login-layout {
-        display: block
+        gap: 24px;
+        padding-right: 24px;
+    }
+
+    .login-story {
+        padding: 36px;
+    }
+
+    .login-card {
+        padding: 30px;
+    }
+}
+
+@media (max-width: 860px) {
+    .sidebar {
+        position: static;
+        width: 100%;
+        padding: 16px 20px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 14px 12px;
+        border-bottom: 4px solid var(--lime);
+    }
+
+    .sidebar .brand {
+        font-size: 22px;
+    }
+
+    .sidebar .brand-symbol {
+        width: 64px;
+        height: 64px;
+    }
+
+    .brand-sub, .workspace-label, .sidebar-bottom {
+        display: none;
+    }
+
+    .sidebar nav {
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .sidebar nav a {
+        font-size: 16px;
+        min-height: 56px;
+        padding: 12px;
+        background: rgba(255, 255, 255, .045);
+    }
+
+    .sidebar nav a.active {
+        background: linear-gradient(135deg, #e6f6d5, #d9f3e7);
+    }
+
+    .sidebar[data-collapsible] .menu-toggle {
+        display: inline-flex;
+    }
+
+    .sidebar[data-collapsible]:not([data-menu-open]) nav,
+    .sidebar[data-collapsible]:not([data-menu-open]) .logout {
+        display: none;
+    }
+
+    .logout {
+        grid-column: 1 / -1;
+        margin: 0;
+    }
+
+    .logout button {
+        width: auto;
+    }
+
+    .main {
+        margin: 0;
+    }
+
+    .topbar {
+        min-height: 64px;
+        padding: 12px 20px;
+    }
+
+    .topbar .pill {
+        margin-left: 8px;
+    }
+
+    .content {
+        padding: 26px 20px;
+    }
+
+    .welcome {
+        padding: 26px;
+    }
+
+    .login-layout {
+        display: block;
+        padding: 0 0 28px;
     }
 
     .login-story {
         min-height: 0;
-        padding: 28px
+        padding: 28px;
+        gap: 22px;
     }
 
-    .login-story>div {
-        margin-top: 33px
+    .login-story .brand-symbol {
+        width: 96px;
     }
 
     .login-story h1 {
-        font-size: 35px;
-        letter-spacing: -1px
+        font-size: 38px;
     }
 
     .login-story p {
-        font-size: 13px
+        font-size: 17px;
     }
 
-    .story-tags,.login-story>small {
-        display: none
+    .story-tags, .login-story > small {
+        display: none;
     }
 
     .login-card {
-        padding: 32px 25px
+        width: calc(100% - 40px);
+        margin: 26px auto 0;
+        padding: 28px;
+    }
+}
+
+@media (max-width: 560px) {
+    .sidebar {
+        padding: 14px 16px;
     }
 
-    .login-card h2 {
-        font-size: 27px
+    .sidebar .brand {
+        font-size: 20px;
+    }
+
+    .sidebar nav a {
+        font-size: 15px;
+        gap: 7px;
+        padding: 10px;
+    }
+
+    .sidebar nav a > span:first-child {
+        width: 18px;
+        font-size: 18px;
+    }
+
+    .content {
+        padding: 24px 16px;
+    }
+
+    .topbar {
+        padding: 12px 16px;
+        font-size: 14px;
+    }
+
+    .page-heading {
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .page-heading > .button {
+        padding: 10px 14px;
+        font-size: 15px;
+    }
+
+    h1 {
+        font-size: 29px;
+    }
+
+    h2 {
+        font-size: 22px;
+    }
+
+    .card, .welcome {
+        padding: 22px;
+        border-radius: 18px;
+    }
+
+    .welcome-art {
+        display: none;
+    }
+
+    .welcome h2 {
+        font-size: 29px;
+    }
+
+    .stats, .form-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .stats {
+        gap: 14px;
+    }
+
+    .stats a {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 4px 16px;
+        align-items: center;
+        padding: 18px 20px;
+    }
+
+    .stats strong {
+        grid-column: 2;
+        grid-row: 1 / 3;
+        margin: 0;
+    }
+
+    .record-grid, .columns {
+        gap: 20px;
+    }
+
+    .message-folders > .button {
+        flex: 1 1 90px;
+    }
+
+    .message-preview > span {
+        flex-basis: 100%;
     }
 
     .section-title {
-        gap: 8px
+        align-items: flex-start;
     }
 
+    .login-story {
+        padding: 24px;
+    }
+
+    .login-story h1 {
+        font-size: 34px;
+    }
+
+    .login-card {
+        width: calc(100% - 32px);
+        padding: 24px;
+    }
+
+    .login-card h2 {
+        font-size: 30px;
+    }
 }
 
 img.brand-symbol {
@@ -944,13 +1083,13 @@ img.brand-symbol {
 }
 
 .message-dot {
-    color: #087957;
+    color: #087a85;
     font-size: .85rem;
     line-height: 1
 }
 
 .sidebar .message-dot {
-    color: #a9e8d0;
+    color: #a9e26a;
     margin-left: auto
 }
 
@@ -1007,4 +1146,83 @@ body.session-check {
 
 .message-preview form {
     margin-top: 0;
+}
+
+.menu-toggle {
+    display: none;
+    background: #e6f5dd;
+    color: #123d43;
+    border-color: #c1dfa4;
+    box-shadow: 0 3px 0 #8eae74;
+    font-size: 15px;
+    padding: 10px 14px;
+}
+
+.sidebar nav a.active .message-dot {
+    color: #086f78;
+}
+
+.sidebar nav a.active:hover {
+    color: #123d43;
+    background: #e1f3ce;
+}
+
+button:active, .button:active {
+    transform: translateY(2px);
+}
+
+button:disabled, .button[aria-disabled="true"] {
+    cursor: default;
+    opacity: .65;
+}
+
+:where(.card, .columns, .record-grid, .welcome, .event-mini, .page-heading) > * {
+    min-width: 0;
+}
+
+tbody tr:hover {
+    background: #f4faf1;
+}
+
+td .button, td form {
+    margin-bottom: 10px;
+}
+
+#citation-fields {
+    background: #f6fbf0;
+    border-color: #bfd7aa;
+    border-radius: 14px;
+}
+
+#citation-fields legend {
+    font-weight: 650;
+    padding: 0 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    button, .button {
+        transition: none;
+    }
+
+    button:hover, .button:hover, button:active, .button:active {
+        transform: none;
+    }
+}
+
+.menu-toggle .message-dot {
+    color: #086f78;
+    margin-left: 0;
+}
+
+.sidebar nav a .nav-label {
+    flex: 1;
+    min-width: 0;
+    font-size: inherit;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 360px) {
+    .sidebar nav {
+        grid-template-columns: minmax(0, 1fr);
+    }
 }

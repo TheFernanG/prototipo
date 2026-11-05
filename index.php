@@ -52,7 +52,7 @@ try {
     
     if(in_array((string)$e->getCode(),['23000'],true)) $error='El registro ya existe o está relacionado con otros datos. Revisa tu selección.';
     
-    else { $error='No se pudo completar la operación. Revisa la conexión en config.php y que hayas importado base_render.sql o aplicado actualizar_notificaciones.sql.';
+    else { $error='No se pudo completar la operación. Revisa la conexión en config.php y que hayas importado base_unificada.sql.';
     $fatal=true;
     http_response_code(503);
     }
@@ -62,7 +62,7 @@ try {
 $u=$fatal?null:user(); ?><!doctype html>
 
 <html lang="es">
-    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?=h($pages[$p])?> · Conecta Escuela</title><link rel="stylesheet" href="assets/style.css?v=5">
+    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title><?=h($pages[$p])?> · Conecta Escuela</title><link rel="stylesheet" href="assets/style.css?v=6">
     </head><body<?php if($u): ?> data-account="<?=h($u['id'])?>" data-page="<?=h($p)?>"<?php endif; ?>>
 <?php if(!$u): ?>
 
@@ -98,12 +98,13 @@ $u=$fatal?null:user(); ?><!doctype html>
 <?php else: ?>
 
     <aside class="sidebar"><a href="index.php" class="brand"><img class="brand-symbol" src="assets/edu.png" width="112" height="112" alt=""> Conecta<span class="brand-sub">ESCUELA</span></a>
+        <button type="button" class="menu-toggle" id="menu-toggle" aria-expanded="false" aria-controls="school-navigation"><span data-menu-label>Menú</span><span class="message-dot" id="mobile-notification-dot" aria-hidden="true" hidden>●</span></button>
         <div class="workspace-label">MI ESPACIO ESCOLAR
         </div>
-        <nav>
+        <nav id="school-navigation" aria-label="Secciones de la plataforma">
 <?php $unread=$unread??unreadMessages((int)$u['id']);
     $icons=['inicio'=>'◈','mensajes'=>'✉','avisos'=>'◉','academico'=>'▤','reportes'=>'◇','calendario'=>'▦','usuarios'=>'◎','grupos'=>'▥','perfil'=>'⚙'];
-    foreach($icons as $key=>$icon): if(in_array($key,['usuarios','grupos'],true) && !role('administrador')) continue; ?><a class="<?=$p===$key?'active':''?>" href="index.php?p=<?=$key?>"><span><?=h($icon)?></span><?=h($pages[$key])?><?php if($key==='mensajes' || in_array($key,NOTIFICATION_SECTIONS,true)): ?><span data-notification="<?=h($key)?>" class="message-dot" role="img" aria-label="<?=$key==='mensajes'?'Mensajes sin leer':'Novedades en '.h($pages[$key])?>" <?=empty($dots[$key])?'hidden':''?>>●</span><?php endif; ?></a><?php endforeach; ?>
+    foreach($icons as $key=>$icon): if(in_array($key,['usuarios','grupos'],true) && !role('administrador')) continue; ?><a class="<?=$p===$key?'active':''?>" href="index.php?p=<?=$key?>"><span><?=h($icon)?></span><span class="nav-label"><?=h($pages[$key])?></span><?php if($key==='mensajes' || in_array($key,NOTIFICATION_SECTIONS,true)): ?><span data-notification="<?=h($key)?>" class="message-dot" role="img" aria-label="<?=$key==='mensajes'?'Mensajes sin leer':'Novedades en '.h($pages[$key])?>" <?=empty($dots[$key])?'hidden':''?>>●</span><?php endif; ?></a><?php endforeach; ?>
         </nav>
         <div class="sidebar-bottom">
             <div class="avatar"><?=h(strtoupper(substr($u['nombre'],0,1)))?>
@@ -462,7 +463,7 @@ if ($deleteUser && (int)$deleteUser['id']!==(int)$u['id']): ?>
             <footer>Conecta Escuela · Comunicación que acompaña el aprendizaje.
             </footer>
         </div>
-    </main><script src="assets/live.js?v=5" defer></script><?php endif; ?>
+    </main><script src="assets/layout.js?v=1" defer></script><script src="assets/live.js?v=5" defer></script><?php endif; ?>
 <?php if($u && $p==='mensajes'): ?><script src="assets/messages.js?v=1" defer></script><?php endif; ?>
 </body>
 </html>

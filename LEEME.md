@@ -10,27 +10,37 @@ Plataforma escolar para docentes, alumnos y padres de familia. Aplicación local
 
 ## Instalación en Windows
 
-1. Extrae el ZIP. Copia la carpeta `comunidad_escolar` completa a `C:\xampp\htdocs\`.
+1. Extrae el ZIP en una carpeta llamada `comunidad_escolar` dentro de `C:\xampp\htdocs\`.
 2. En el panel de XAMPP, inicia **Apache** y **MySQL**.
 3. Abre `http://localhost/phpmyadmin`.
-4. En **Importar**, selecciona `comunidad_escolar/base_de_datos.sql` y ejecuta la importación. El archivo crea la base y todas las tablas con datos de ejemplo. No necesitas crear tablas manualmente.
+4. Crea o selecciona la base `comunidad_escolar`. En **Importar**, selecciona `base_unificada.sql` y ejecuta la importación.
 5. Revisa `config.php`: host `127.0.0.1`, puerto `3306`, base `comunidad_escolar`, usuario `root` y contraseña vacía. Si cambiaste los datos de MySQL en tu equipo, escribe los valores reales.
-6. Abre **http://localhost/comunidad_escolar/**.
+6. Si la base es nueva, crea el primer administrador siguiendo la sección siguiente. Abre **http://localhost/comunidad_escolar/**.
 
-Importa el SQL una sola vez en una base nueva. No lo importes encima de otra instalación: las tablas usan nombres explícitos para evitar modificar registros existentes de manera silenciosa.
+El proyecto incluye un único archivo SQL, `base_unificada.sql`, con las 15
+tablas de la aplicación. Al importarlo en la base que ya utiliza el proyecto,
+se crean las tablas que falten. Las tablas existentes conservan su estructura
+y sus datos.
 
-## Cuentas de prueba
+## Primer administrador en una instalación nueva
 
-Todas usan la contraseña **Escuela2026!** (respeta mayúscula y signo).
+La base nueva empieza vacía. Genera un hash con PHP en la terminal de XAMPP.
 
-| Rol | Correo |
-| --- | --- |
-| Administrador | admin@escuela.mx |
-| Docente | docente@escuela.mx |
-| Alumno | alumno@escuela.mx |
-| Padre de familia | padre@escuela.mx |
+```powershell
+& C:\xampp\php\php.exe -r 'echo password_hash(trim(fgets(STDIN)), PASSWORD_DEFAULT);'
+```
 
-Entra a **Mi cuenta** para cambiar cada contraseña. Los nombres y datos incluidos son ficticios.
+Escribe la contraseña que usarás y copia el hash. En phpMyAdmin, selecciona
+`comunidad_escolar` y ejecuta la consulta con tu correo y el hash generado.
+
+```sql
+INSERT INTO usuarios (nombre, email, password, rol)
+VALUES ('Administrador escolar', 'TU_CORREO', 'PEGA_AQUI_EL_HASH', 'administrador');
+```
+
+Ingresa con ese correo y contraseña. Desde **Usuarios** puedes crear las
+cuentas docentes, de alumnos y de padres. Si la base ya contiene usuarios,
+utiliza las cuentas existentes.
 
 ## Qué puede hacer cada rol
 
@@ -60,7 +70,7 @@ Cada grupo incluye su ciclo escolar. Un alumno puede estar inscrito en varios gr
 ## Uso de módulos
 
 - **Mi panel:** mensajes sin leer, grupos, alumnos, avisos y próximas actividades.
-- **Mensajes:** selecciona destinatario, asunto y texto. Los mensajes se ven al recargar la página; no se envían por WhatsApp ni correo. Abre un mensaje recibido y pulsa **Marcar como leído**.
+- **Mensajes:** selecciona destinatario, asunto y texto. Las novedades se actualizan automáticamente. Abrir un mensaje recibido lo mueve a Leídos.
 - **Avisos:** publicaciones generales o por grupo.
 - **Seguimiento académico:** historial con escala 0–10, periodo y observaciones. El sistema verifica que el alumno esté inscrito en la clase seleccionada.
 - **Comportamiento:** reportes positivos, observaciones o incidencias con fecha.
@@ -69,14 +79,14 @@ Cada grupo incluye su ciclo escolar. Un alumno puede estar inscrito en varios gr
 
 Los formularios de alta se abren pulsando el título con **＋**. Para corregir avisos, eventos, notas o reportes, su autor o administración los elimina y vuelve a capturarlos. La versión incluye altas, consultas y eliminación de esos registros, sin formularios de edición. Las eliminaciones son inmediatas y no tienen papelera.
 
-Se muestran los últimos 100 mensajes, avisos y actividades, y los últimos 200 registros académicos y de comportamiento. No hay exportación PDF ni paginación en esta versión.
+Se muestran los últimos 100 mensajes, avisos y actividades, y los últimos 200 registros académicos y de comportamiento. Los citatorios se descargan en PDF desde el mensaje.
 
 ## Archivos
 
 - `index.php`: interfaz, navegación y formularios.
 - `app.php`: conexión, sesiones, validaciones, permisos y operaciones.
 - `config.php`: conexión a MySQL y zona horaria de México.
-- `base_de_datos.sql`: base de datos con relaciones y ejemplos.
+- `base_unificada.sql`: esquema completo con las 15 tablas y sus relaciones.
 - `assets/style.css`: diseño para computadora y celular.
 - `PRUEBAS.md`: comprobaciones y prueba guiada.
 
@@ -91,7 +101,7 @@ Para restablecer una contraseña olvidada en esta práctica, un responsable con 
 - **Not Found:** verifica la ruta `C:\xampp\htdocs\comunidad_escolar\index.php` y entra por `http://localhost/comunidad_escolar/`, no abriendo el archivo con doble clic.
 - **No conecta:** inicia MySQL y revisa usuario, contraseña, puerto y base en `config.php`.
 - **Apache usa otro puerto:** por ejemplo, entra por `http://localhost:8080/comunidad_escolar/`.
-- **Base ya existe:** no borres tu información; usa otra base vacía y cambia el nombre tanto en las primeras líneas del SQL como en `config.php`.
+- **Base existente:** selecciona la base usada por el proyecto e importa `base_unificada.sql`. El nombre debe coincidir con `config.php` o `DB_NAME`.
 - **Listas vacías:** revisa las asignaciones, inscripciones, vínculos y cuentas activas.
 - **No deja eliminar una clase:** conserva su historial o elimina primero las calificaciones relacionadas si realmente deseas descartarlas.
 - **Importación demasiado grande por límite de índices:** usa una instalación reciente de MariaDB/MySQL compatible con utf8mb4.
@@ -105,7 +115,7 @@ Entrega académica local. Antes de usar datos reales o publicar en Internet se r
 - Puedes personalizar el logo sustituyendo `assets/logo.svg`.
 - Con el sitio abierto, el navegador consulta los mensajes aproximadamente cada dos segundos. El punto en **Mensajes** aparece si hay mensajes sin leer. Al enviar, aparece un punto junto a **Mensaje enviado**.
 - Cerrar sesión elimina la sesión y su cookie. Si usas Atrás, las páginas privadas vuelven a comprobar el acceso.
-- Para actualizar una instalación existente, copia los archivos del proyecto. Si falta la tabla de notificaciones, ejecuta `actualizar_notificaciones.sql`. Conserva tu configuración local de `config.php`.
+- Para actualizar una instalación existente, copia los archivos del proyecto. Si falta la tabla de notificaciones, ejecuta `base_unificada.sql`. Conserva tu configuración local de `config.php`.
 
 ## Actualización automática en computadora y celular
 
@@ -151,13 +161,12 @@ destinatario pueden descargarlo con su sesión iniciada. También funciona con
 los mensajes anteriores dirigidos a alumnos y padres.
 
 Copia todos los archivos, incluidos `citatorio.php` y `pdf_citatorio.php`.
-El Dockerfile ya los incluye. Ejecuta `actualizar_mensajes_citatorios.sql` para agregar las tablas necesarias.
+El Dockerfile ya los incluye. Ejecuta `base_unificada.sql` para agregar las tablas necesarias.
 
 ## Formato del citatorio y eliminación de mensajes
 
 Antes de usar esta versión con una base existente, ejecuta
-`actualizar_mensajes_citatorios.sql` una vez en esa base. Para una instalación
-nueva, las tablas ya están incluidas en `base_render.sql`.
+`base_unificada.sql` una vez en esa base. El mismo archivo sirve para una instalación nueva.
 
 Al elegir un alumno o padre como destinatario se muestran los datos del
 citatorio. Elige la fecha y hora de la cita. El alumno se selecciona
@@ -180,3 +189,17 @@ el documento indica que ese dato está por confirmar.
 eliminación afecta solo las carpetas de la cuenta que pulsa el botón. La otra
 persona conserva su copia. Los eliminados dejan de contarse como mensajes sin
 leer y su citatorio deja de estar disponible para esa cuenta.
+
+## Presentación en computadora y celular
+
+La interfaz utiliza texto principal de 17 px, campos de 16 px, títulos más
+grandes y la paleta azul petróleo, turquesa, verde y crema del logo.
+Las tarjetas y botones tienen bordes y sombras para dar relieve.
+
+En celular, el botón **Menú** abre las secciones. Un punto junto al botón
+indica novedades aunque el menú esté cerrado. En las pantallas más pequeñas,
+las secciones se muestran en una columna. Los formularios se apilan y las
+tablas anchas se desplazan dentro de su contenedor.
+
+Para aplicar este diseño, reemplaza los archivos y despliega la versión nueva.
+Incluye `assets/layout.js` junto con los demás recursos.
