@@ -9,12 +9,17 @@ $p=(string)($_GET['p']??'inicio');
 $pages=['inicio'=>'Mi panel','mensajes'=>'Mensajes','avisos'=>'Avisos escolares','academico'=>'Seguimiento académico','reportes'=>'Comportamiento','calendario'=>'Calendario','usuarios'=>'Usuarios','grupos'=>'Grupos y familias','perfil'=>'Mi cuenta','login'=>'Ingresar'];
     
 if(!isset($pages[$p])) $p='inicio';
+$folder=$_GET['carpeta']??'entrada';
+if (!in_array($folder,['entrada','leidos','enviados'],true)) $folder='entrada';
+$openedId=max(0,(int)filter_var($_GET['mensaje']??null,FILTER_VALIDATE_INT));
     
+$live=($_GET['live']??'')==='messages' && $_SERVER['REQUEST_METHOD']==='GET';
 try {
     if(isset($_SESSION['uid']) && time()-($_SESSION['last']??0)>1800) { destroySession();
+    if ($live) { http_response_code(401); exit; }
     redirectTo('login');
     }
-    if (($_GET['live']??'')==='messages' && $_SERVER['REQUEST_METHOD']==='GET') {
+    if ($live) {
         header('Content-Type: application/json; charset=utf-8');
     
         $u=user();
@@ -34,7 +39,7 @@ try {
             $html=ob_get_clean();
     
         }
-        echo json_encode(['unread'=>$unread,'html'=>$html], JSON_INVALID_UTF8_SUBSTITUTE);
+        echo json_encode(['unread'=>$unread,'dots'=>notificationDots((int)$u['id'],$unread),'html'=>$html], JSON_INVALID_UTF8_SUBSTITUTE);
     
         exit;
     
@@ -53,12 +58,19 @@ try {
     $p='inicio';
     $error='Esta sección es exclusiva de administración.';
     }
+    if ($u=user()) {
+        $uid=(int)$u['id'];
+        if (in_array($p,NOTIFICATION_SECTIONS,true)) seeNotifications($p,$uid);
+        $unread=unreadMessages($uid);
+        $dots=notificationDots($uid,$unread);
+    }
 } catch(PDOException $e) {
     error_log($e->getMessage());
+    if ($live) { http_response_code(503); exit; }
     
     if(in_array((string)$e->getCode(),['23000'],true)) $error='El registro ya existe o está relacionado con otros datos. Revisa tu selección.';
     
-    else { $error='No se pudo completar la operación. Revisa la conexión en config.php y que hayas importado base_de_datos.sql.';
+    else { $error='No se pudo completar la operación. Revisa la conexión en config.php y que hayas importado base_render.sql o aplicado actualizar_notificaciones.sql.';
     $fatal=true;
     http_response_code(503);
     }
@@ -108,9 +120,9 @@ $u=$fatal?null:user(); ?><!doctype html>
         <div class="workspace-label">MI ESPACIO ESCOLAR
         </div>
         <nav>
-<?php $unread=unreadMessages((int)$u['id']);
+<?php $unread=$unread??unreadMessages((int)$u['id']);
     $icons=['inicio'=>'◈','mensajes'=>'✉','avisos'=>'◉','academico'=>'▤','reportes'=>'◇','calendario'=>'▦','usuarios'=>'◎','grupos'=>'▥','perfil'=>'⚙'];
-    foreach($icons as $key=>$icon): if(in_array($key,['usuarios','grupos'],true) && !role('administrador')) continue; ?><a class="<?=$p===$key?'active':''?>" href="index.php?p=<?=$key?>"><span><?=h($icon)?></span><?=h($pages[$key])?><?php if($key==='mensajes'): ?><span id="message-dot" class="message-dot" role="img" aria-label="Mensajes sin leer" <?=$unread?'':'hidden'?>>●</span><?php endif; ?></a><?php endforeach; ?>
+    foreach($icons as $key=>$icon): if(in_array($key,['usuarios','grupos'],true) && !role('administrador')) continue; ?><a class="<?=$p===$key?'active':''?>" href="index.php?p=<?=$key?>"><span><?=h($icon)?></span><?=h($pages[$key])?><?php if($key==='mensajes' || in_array($key,NOTIFICATION_SECTIONS,true)): ?><span data-notification="<?=h($key)?>" class="message-dot" role="img" aria-label="<?=$key==='mensajes'?'Mensajes sin leer':'Novedades en '.h($pages[$key])?>" <?=empty($dots[$key])?'hidden':''?>>●</span><?php endif; ?></a><?php endforeach; ?>
         </nav>
         <div class="sidebar-bottom">
             <div class="avatar"><?=h(strtoupper(substr($u['nombre'],0,1)))?>
@@ -208,8 +220,12 @@ $rec=recipients(); ?>
                 <section class="card">
                     <h2>Bandeja de mensajes
                     </h2>
-                    <p class="muted">Últimos 100 mensajes recibidos y enviados.
-                    </p>
+                    <nav class="message-folders" aria-label="Carpetas de mensajes">
+                        <?php foreach (['entrada'=>'Entrada','leidos'=>'Leídos','enviados'=>'Enviados'] as $key=>$label): ?>
+                            <a class="button secondary small" href="index.php?p=mensajes&amp;carpeta=<?=$key?>" <?=$folder===$key?'aria-current="page"':''?>><?=$label?></a>
+                        <?php endforeach; ?>
+                    </nav>
+                    <p class="muted">Se muestran hasta 100 mensajes por carpeta.</p>
                     <div id="message-list"><?php require __DIR__.'/bandeja.php'; ?>
                     </div>
                 </section>
@@ -432,6 +448,6 @@ try {
             <footer>Conecta Escuela · Comunicación que acompaña el aprendizaje.
             </footer>
         </div>
-    </main><script src="assets/live.js" defer></script><?php endif; ?>
+    </main><script src="assets/live.js?v=2" defer></script><?php endif; ?>
 </body>
 </html>

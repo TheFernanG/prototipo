@@ -1,14 +1,16 @@
 'use strict';
 
 const body = document.body;
-const dot = document.querySelector('#message-dot');
+const dots = document.querySelectorAll('[data-notification]');
 const count = document.querySelector('#unread-count');
 const list = document.querySelector('#message-list');
 const url = new URL('index.php', location.href);
 url.search = new URLSearchParams({
     live: 'messages',
     p: body.dataset.page,
-    account: body.dataset.account
+    account: body.dataset.account,
+    carpeta: new URLSearchParams(location.search).get('carpeta') || 'entrada',
+    mensaje: new URLSearchParams(location.search).get('mensaje') || ''
 });
 let previousHtml;
 let polling = false;
@@ -27,16 +29,17 @@ async function refreshMessages() {
         }
         if (!response.ok) return;
         const data = await response.json();
-        dot.hidden = data.unread === 0;
+        dots.forEach(dot => { dot.hidden = !data.dots[dot.dataset.notification]; });
         if (count) count.textContent = data.unread;
-        if (list && data.html !== previousHtml) {
+        if (list && previousHtml === undefined) previousHtml = list.innerHTML.trim();
+        if (list && data.html.trim() !== previousHtml) {
             const openIds = new Set(Array.from(list.querySelectorAll('details[open]'),
                 item => item.dataset.messageId));
             list.innerHTML = data.html;
             list.querySelectorAll('details').forEach(item => {
                 item.open = openIds.has(item.dataset.messageId);
             });
-            previousHtml = data.html;
+            previousHtml = data.html.trim();
         }
     } catch (error) {
         // Retry on the next poll if the server or connection is unavailable.

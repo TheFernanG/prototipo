@@ -55,3 +55,16 @@ Si la portada abre pero el inicio de sesión falla, revisa **Logs**, confirma
 que importaste el esquema en la base de `DB_NAME` y verifica el acceso remoto
 y los requisitos TLS del proveedor. `base_de_datos.sql` es la instalación
 original para XAMPP y contiene datos de prueba.
+
+## Actualizar una base de datos existente
+
+Antes de desplegar esta versión, ejecuta `actualizar_notificaciones.sql` en la
+misma base de datos que ya usa la aplicación. El script agrega la tabla de
+lecturas por usuario y conserva los registros existentes. Para una instalación
+nueva, la tabla ya está incluida en `base_render.sql`.
+
+Los puntos se actualizan mientras el panel está abierto. Al entrar a una sección
+escolar se marcan sus novedades como vistas para esa cuenta. Los registros
+previos de otros usuarios pueden aparecer como novedades hasta la primera visita.
+En Mensajes, **Abrir** mueve el mensaje de **Entrada** a **Leídos** y muestra
+su contenido. Los mensajes enviados se consultan en **Enviados**.

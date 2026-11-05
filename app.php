@@ -90,6 +90,45 @@ function options(array $list,string $label='nombre'): string { $s='<option value
 function groupOptions(bool $global=false): string { return ($global?'<option value="0">Toda la escuela</option>':'').options(groups()); }
 function studentSql(string $col): array { $ids=array_map('intval',array_column(students(),'id')); return $ids ? [$col.' IN ('.implode(',',array_fill(0,count($ids),'?')).')',$ids] : ['1=0',[]]; }
 function audienceSql(string $alias='r'): array { $ids=array_map('intval',array_column(groups(),'id')); if (role('administrador')) return ['1=1',[]]; return ["($alias.grupo_id IS NULL".($ids?' OR '.$alias.'.grupo_id IN ('.implode(',',array_fill(0,count($ids),'?')).')':'').')',$ids]; }
+function notificationScope(string $section): array {
+    if ($section==='avisos' || $section==='calendario') {
+        [$where,$args]=audienceSql();
+        $table=$section==='avisos'?'avisos':'eventos';
+    } else {
+        [$where,$args]=studentSql('r.alumno_id');
+        $table=$section==='academico'?'calificaciones':'reportes';
+        if ($section==='academico' && role('docente')) {
+            $table.=' r JOIN asignaciones a ON a.id=r.asignacion_id';
+            $where.=' AND a.docente_id=?';
+            $args[]=user()['id'];
+            return [$table,$where,$args];
+        }
+    }
+    return [$table.' r',$where,$args];
+}
+const NOTIFICATION_SECTIONS=['avisos','academico','reportes','calendario'];
+
+function notificationDots(int $id, int $unread): array {
+    $dots=['mensajes'=>$unread>0];
+    foreach (NOTIFICATION_SECTIONS as $section) {
+        [$source,$where,$args]=notificationScope($section);
+        $dots[$section]=one("SELECT 1 FROM $source WHERE ($where) AND r.autor_id<>?
+            AND NOT EXISTS (SELECT 1 FROM notificaciones_vistas v
+                WHERE v.usuario_id=? AND v.seccion=? AND v.registro_id=r.id)
+            LIMIT 1",array_merge($args,[$id,$id,$section]))!==null;
+    }
+    return $dots;
+}
+
+function seeNotifications(string $section,int $id): void {
+    [$source,$where,$args]=notificationScope($section);
+    q("INSERT INTO notificaciones_vistas(usuario_id,seccion,registro_id)
+        SELECT ?,?,r.id FROM $source WHERE ($where) AND r.autor_id<>?
+        AND NOT EXISTS (SELECT 1 FROM notificaciones_vistas v
+            WHERE v.usuario_id=? AND v.seccion=? AND v.registro_id=r.id)
+        ON DUPLICATE KEY UPDATE registro_id=notificaciones_vistas.registro_id",
+        array_merge([$id,$section],$args,[$id,$id,$section]));
+}
 function validateUser(int $id,string $rol): void { if (!one('SELECT id FROM usuarios WHERE id=? AND rol=? AND activo=1',[$id,$rol])) throw new RuntimeException('Usuario inválido para este rol.'); }
 function deleteForm(string $table,int $id): string { return '<form method="post" class="inline">'.csrf().'<input type="hidden" name="action" value="delete"><input type="hidden" name="table" value="'.h($table).'"><input type="hidden" name="id" value="'.$id.'"><button class="danger small">Eliminar</button></form>'; }
 require_once __DIR__.'/recuperacion_logica.php';
@@ -146,7 +185,12 @@ function handlePost(): void {
         $id=num('destinatario_id'); if(!in_array($id,array_map('intval',array_column(recipients(),'id')),true)) throw new RuntimeException('Destinatario fuera de tus grupos.');
         q('INSERT INTO mensajes(remitente_id,destinatario_id,asunto,cuerpo) VALUES(?,?,?,?)',[user()['id'],$id,val('asunto',150),val('cuerpo',5000)]); flash('Mensaje enviado.','sent'); redirectTo('mensajes');
     }
-    if ($action==='read') { q('UPDATE mensajes SET leido=1 WHERE id=? AND destinatario_id=?',[num('id'),user()['id']]); redirectTo('mensajes'); }
+    if ($action==='read') {
+        $id=num('id');
+        q('UPDATE mensajes SET leido=1 WHERE id=? AND destinatario_id=?',[$id,user()['id']]);
+        header('Location: index.php?p=mensajes&carpeta=leidos&mensaje='.$id.'#mensaje-'.$id,true,303);
+        exit;
+    }
     if ($action==='announcement' || $action==='event') {
         requireRole('administrador','docente'); $g=filter_var($_POST['grupo_id']??null,FILTER_VALIDATE_INT); if($g===false || $g===null || $g<0 || ($g===0 && !role('administrador')) || ($g>0 && !groupAllowed($g))) throw new RuntimeException('Grupo no permitido.');
         if($action==='announcement') { q('INSERT INTO avisos(autor_id,grupo_id,titulo,cuerpo) VALUES(?,?,?,?)',[user()['id'],$g?:null,val('titulo',150),val('cuerpo',5000)]); flash('Aviso publicado.'); redirectTo('avisos'); }
